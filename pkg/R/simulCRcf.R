@@ -149,11 +149,12 @@ simulCRcf <- function(nsim  = NULL,
                                        clock=clock))
       for (ds in dest.states) {
         if (! colnames(trans)[ds] %in% colnames(res))
-          res <- cbind(res, matrix(NA, nrow(res), 2,
-            dimnames=list(NULL, c(paste("T", colnames(trans)[ds], sep=""),
-                                  colnames(trans)[ds]))))
-      res[whichss, paste(c("T",""), colnames(trans)[dest.states], sep="")] <-
-        res2[, paste(c("T",""), colnames(trans)[dest.states], sep="")]
+          res <- cbind(res, matrix(cbind(res[, paste("T",
+                                         rownames(trans)[ss], sep="")], 0),
+                                   nrow(res), dimnames=list(NULL, 
+            c(paste("T", colnames(trans)[ds], sep=""), colnames(trans)[ds]))))
+      res[whichss, paste(c("T",""), colnames(trans)[ds], sep="")] <-
+        res2[, paste(c("T",""), colnames(trans)[ds], sep="")]
       }
 
       pres.state[whichss] <- apply(
@@ -164,6 +165,6 @@ simulCRcf <- function(nsim  = NULL,
   }
   
   
-  return(res)
+  return(as.data.frame(res))
   
 }
