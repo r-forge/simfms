@@ -1,0 +1,62 @@
+\documentclass[a4paper,10pt]{article}
+%\documentclass[a4paper,10pt]{scrartcl}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath, fullpage, amssymb, default}
+
+\SweaveOpts{eps=FALSE}
+
+\begin{document}
+Consider a subject arriving at state $s$ at time $t_1$.
+To simulate the time of the next transition, 
+a marginal survival function $S_2(t)=\exp(-\int_0^th_2(u)\text{d}u)$ is chosen
+and, according to the copula model, a conditional survival function
+$S_2(t|T_1=t_1)$ is obtained.
+
+<<echo=FALSE, fig=TRUE, height=3.4>>=
+  distr = function(t) 1-pweibull(t,3,5)
+  plot(distr,0,15, ylim=c(0,1), xlab=expression(italic(t)),
+    ylab=expression(italic(S)[2](paste(italic(t),"|",
+      italic(T)[1],"=", italic(t)[1]))))
+@
+
+As time until $t_1$ has already passed, 
+  the simulation of the additional time from $S_2(t)$ 
+  corresponds to the clock-reset approach in modelling.
+In this case, since $S_2(t|T_1=t_1)\sim \text U(0,1)$, then simulation is done by
+\begin{equation} \label{eq:simClkRes}
+  T_2 = S_2^{-1}(U|T_1=t_1), \qquad U\sim\text U(0,1),
+\end{equation}
+  where $S^{-1}(\cdot)$ is the inverse of $S(\cdot)$.
+  
+If, on the contrary, one wants to simulate data in a clock-forward manner, 
+ the truncated distribution
+\begin{align*}
+  S^\star_2(t|T_1=t_1) &= 
+    \mathbb P(T>t|T_1=t_1, T>t_1) \\
+  &= \frac{ \mathbb P(T>t,T_1=t_1|T>t_1) }
+          { \mathbb P(T_1=t_1|T>t_1) } = 
+     \frac{S_2(t|T_1=t_1)}{S_2(t_1|T_1=t_1)}
+\end{align*}
+must be used.
+
+<<echo=FALSE, fig=TRUE, height=3.4>>=
+  condistr = function(x) (distr(x)/distr(4))*(x>=4)
+  plot(distr,0,15, ylim=c(0,1), xlab=expression(italic(t)),
+    ylab=expression(paste(italic(S)[2],"*(",italic(t),"|",
+      italic(T)[1],"=", italic(t)[1],")")), col="grey")
+  mtext(expression(italic(t)[1]), side=1,  at=4)
+  abline(v=4)
+  curve(condistr, 4, 15, add=TRUE)
+@
+
+Now simulation is done by
+\[ 
+  T_2 = {S^\star_2}^{-1}(U|T_1=t_1)
+      = S_2^{-1}(U S_2(t_1|T_1=t_1)|T_1=t_1), \qquad U\sim\text U(0,1)
+\]
+which is the same as (\ref{eq:simClkRes}) with the argument $U$ replaced by
+$U S_2(t_1|T_1=t_1)$.
+
+%In the Weibull case, $S_2(t)=\exp(\lambda_2 t^{\rho_2})$, we have
+%  \[ T_2 = \left( t_1^{\rho_2} - \frac{\log U}{\lambda_2} \right)^{1/\rho_2}, \qquad U\sim\text U(0,1). \]
+\end{document}

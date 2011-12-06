@@ -1,0 +1,93 @@
+\documentclass[a4paper,10pt]{article}
+%\documentclass[a4paper,10pt]{scrartcl}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath, fullpage}
+\begin{document}
+\section*{Clayton--Weibull model}
+\subsection*{Clayton copula}
+The joint survival function is
+  \begin{align}
+    S_{J_0}(\textbf{t}_{J_0}) &= \left( 1+ \sum_{j\in J_0} \left[ S_j(t_j)^{-\theta} -1 \right] \right)^{-1/\theta},
+      \qquad \textbf{t}_{J_0}=(1,2,3),
+      \label{eq:joint123}
+  \end{align}
+  with $\theta>0$ and one can easily show that the derivatives are of the form
+  \[
+     \frac{\partial^i}{\partial t_{(1)} \cdots \partial t_{(i)}}
+        S_{J_0}(\textbf{t}_{J_0}) = (-1)^i
+        \prod_{h=1}^i \left[ (1+(h-1)\theta) f_h(t_h)\left(S_h(t_h)\right)^{-\theta-1} \right]
+        \left(S_{J_0}(\textbf{t}_{J_0})\right)^{1+i\theta}.
+  \]
+  Therefore the conditional survival distributions are
+  \begin{align}
+    \nonumber
+    S_{(k)|(1),\ldots,(k-1)} \left( t_{(k)}|t_{(1)},\ldots,t_{(k-1)} \right) 
+    =& \frac{
+        (-1)^{k-1} \prod_{h=1}^{k-1} \left[ (1+(h-1)\theta) f_h(t_h)\left(S_h(t_h)\right)^{-\theta-1} \right]
+    }{
+        (-1)^{k-1} \prod_{h=1}^{k-1} \left[ (1+(h-1)\theta) f_h(t_h)\left(S_h(t_h)\right)^{-\theta-1} \right]
+    }
+    \\ \nonumber
+    &\times \frac{
+        \left(S_{J_0}\left( t_{(1)},\ldots,t_{(k)},0,\ldots,0 \right)\right)^{1+(k-1)\theta}
+    }{
+        \left(S_{J_0}\left( t_{(1)},\ldots,t_{(k-1)}, 0,\ldots,0 \right)\right)^{1+(k-1)\theta}
+    }
+%     \\ \nonumber
+%     =& \left(\frac{
+%         S_{J_0} \left( t_{(1)},\ldots,t_{(k)},0,\ldots,0 \right)
+%     }{ %(-1)^{k-1}
+%         S_{J_0} \left( t_{(1)},\ldots,t_{(k-1)}, 0,\ldots,0 \right)
+%     }\right)^{1+(k-1)\theta}
+    \\
+    =& \left(
+      1+\frac{S_k(t_k)^{-\theta}-1}{1+\sum_{j=1}^{k-1} (S_j(t_j)^{-\theta}-1)}
+    \right)^{1-k-\frac1\theta}
+    \qquad  k= 2,3.
+    \label{eq:condClay}
+  \end{align}
+
+  The times can be simulated as
+  \begin{equation} \label{Tcond}
+    T_k|T_1,\ldots,T_{k-1} = S_k^{-1}\left(
+      \left\{ 1+
+        \left[ U_k^{\theta/(\theta(1-k)-1)}-1\right]
+        \left[ 1+ \sum_{j=1}^{k-1} \left( S_j(t_j)^{-\theta}-1 \right) \right]
+      \right\}^{-\frac1\theta}
+    \right),
+  \end{equation}
+  with $U_k\sim\text{U}(0,1)$.
+
+\subsection*{Weibull marginals}
+  In case of Weibull marginal survival functions we have 
+  \[ 
+    S_k(t_k) = \exp(-\lambda_k t_k^{\rho_k})
+    \qquad \text{and} \qquad 
+    S_k^{-1}(u_k) = \left( -\log(u_k)/\lambda_k \right)^{1/\rho_k}.
+  \]
+  Therefore equation (\ref{Tcond}) is in this case
+  \begin{equation*}
+    T_k|T_1,\ldots,T_{k-1} = \left(
+      \frac1{\theta\lambda_k}\log\left\{ 1+
+        \left[ U_k^{-\theta/((k-1)\theta+1)}-1\right]
+        \left[ 1+ \sum_{j=1}^{k-1} \left( \exp(\theta\lambda_j t_j^{\rho_j})-1 \right) \right]
+      \right\}
+    \right)^{1/\rho_k},
+  \end{equation*}
+  which is 
+  \begin{align*}
+    T_2|T_1 &= \left(
+      \frac1{\theta\lambda_2}\log\left\{ 1+
+        \left[ U_2^{-\theta/(\theta+1)}-1\right]
+        \exp(\theta\lambda_1 t_1^{\rho_1})
+      \right\}
+    \right)^{1/\rho_2} &\qquad\text{for } k=2 \text{ and}\\
+%     
+    T_3|T_1,T_2 &=\left(
+      \frac1{\theta\lambda_3}\log\left\{ 1+
+        \left[ U_3^{-\theta/(2\theta+1)}-1\right]
+        \left[ \exp(\theta\lambda_1 t_1^{\rho_1}) +\exp(\theta\lambda_2 t_2^{\rho_2}) -1 \right]
+      \right\}
+    \right)^{1/\rho_3} &\qquad\text{for } k=3.
+  \end{align*}
+\end{document}
