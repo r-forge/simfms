@@ -1,5 +1,4 @@
-claytonCRBlock <-
-function(theta  =1,
+claytonCRBlock <- function(theta  =1,
                            prev  =NULL,
                            nsim  =NULL, 
                            marg  =NULL,

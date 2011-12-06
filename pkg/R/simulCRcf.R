@@ -1,5 +1,4 @@
-simulCRcf <-
-function(nsim  = NULL,
+simulCRcf <- function(nsim  = NULL,
                       trans = NULL,
                       clock = "reset",
                     # Frailty
@@ -144,7 +143,8 @@ function(nsim  = NULL,
                                        theta=ctheta, 
                                        marg=marg, pars=pars[, transitions],
                                        cens=cens,  cpars=cpars[, ss],
-                                       adcens=adcens, eta=eta[whichss,],
+                                       adcens=adcens, 
+                                       eta=matrix(eta[whichss,], length(whichss)),
                                        names=colnames(trans)[dest.states],
                                        clock=clock))
       for (ds in dest.states) {
@@ -156,8 +156,10 @@ function(nsim  = NULL,
         res2[, paste(c("T",""), colnames(trans)[dest.states], sep="")]
       }
 
-      pres.state[whichss] <- apply(res2[, (ncol(res2)/2+1):ncol(res2)], 1,
-        function(x) {ifelse(sum(x) != 0, names(x)[which(x==1)], NA) })
+      pres.state[whichss] <- apply(
+        matrix(res2[, (ncol(res2)/2+1):ncol(res2)], length(whichss)), 
+        1, function(x) {
+          ifelse(sum(x) != 0, names(dest.states)[which(x==1)], NA) })
     }
   }
   

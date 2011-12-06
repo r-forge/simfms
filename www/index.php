@@ -35,14 +35,15 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 <!-- project title  -->
 
 <h2>Simulation of clustered multi-state data</h2>
+<em>F.Rotolo</em>
 
-<div style="width:425px" id="__ss_9422763">
-  <strong style="display:block;margin:12px 0 4px">
+<div id="__ss_9422763" align="center"">
+  <!--strong style="display:block;margin:12px 0 4px">
     <a href="http://www.slideshare.net/federicorotolo/a-copulabased-simulation-method-for-clustered-multistate-survival-data" 
        title="A copula-based Simulation Method for Clustered Multi-State Survival Data"
        target="_blank">A copula-based Simulation Method for Clustered Multi-State Survival Data</a>
-   </strong>
-   <iframe src="http://www.slideshare.net/slideshow/embed_code/9422763" width="425" height="355" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+   </strong-->
+   <iframe src="http://www.slideshare.net/slideshow/embed_code/9422763" width="600" height="450" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
    <!--div style="padding:5px 0 12px"> View more <a href="http://www.slideshare.net/" target="_blank">presentations</a>
     from <a href="http://www.slideshare.net/federicorotolo" target="_blank">federicorotolo</a>
    </div-->
