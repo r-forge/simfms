@@ -1,0 +1,11 @@
+Package: simfms
+Type: Package
+Title: Simulation of clustered multi-state data: Project Info
+Version: 1.0
+Date: 2011-12-06
+Author: Federico Rotolo
+Maintainer: Federico Rotolo <federico.rotolo@stat.unipd.it>
+Description: R functions implementing the simulation procedure proposed at
+  http://www.slideshare.net/federicorotolo/a-copulabased-simulation-method-for-clustered-multistate-survival-data
+  to generate survival data with a clustered and multi-state structure.
+License: GPL
