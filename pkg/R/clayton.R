@@ -1,33 +1,58 @@
-clayton <-
-function(theta=1,
+clayton <- function(theta=1,
+                    cond =NULL,
                     prev =NULL,
                     nsim =NULL,
                     marg =NULL,
                     pars =NULL,
                     eta  =NULL,
                     clock=NULL) {
-  if (is.null(clock))
+  if (is.null(clock)) {
     clock <- "r"
+    warning("Parameter 'clock' is not set! Fixed to 'reset'.")
+  }
   if (!(substring(clock, 1, 1) %in% c("r","f")))
     stop("Clock parameter 'clock' must be either 'f' (forward) or 'r' (reset)!")
   
   # starting state or conditioned?
-  if (is.null(prev)){
+  if (is.null(cond) && is.null(prev)){
     if (is.null(nsim)) 
-      stop(paste("\nProvide either the conditioning times 'prev'",
-                 "or the number of subject to simulate 'nsim'!\n"))
-    k <- 1
-  } else {
+      stop(paste("\nProvide either the number of subjects to simulate 'nsim'",
+                 "or \n the conditioning times 'cond' and/or",
+                 "the previous times 'prev'!\n"))
+    else
+      k <- 1
+  }
+  else {
     if (!is.null(nsim))
-      stop(paste("\nProvide only one betwen the conditioning times 'prev'",
-                 "and the number of subject to simulate 'nsim'!\n"))
-    prev <- as.matrix(prev)
-    k<-ncol(prev)+1
-    nsim<-nrow(prev)
+      stop(paste("\nProvide only one between",
+                 "the number of subjects to simulate 'nsim'",
+                 "and \n the conditioning times 'cond' and/or",
+                 "the previous times 'prev'!\n"))
+    if (!is.null(cond) && !is.null(prev)) {
+      if (length(cond) != nrow(prev))
+        stop(paste("The number of previous times 'prev' (",
+                   nrow(prev),   ") and that of conditioning times 'cond' (",
+                   length(cond), ") do not match!", sep=""))
+    }
+    if (!is.null(cond)) {
+      cond <- as.matrix(cond)
+        if (ncol(cond)!=1)
+          stop(paste("\nThe conditioning times 'cond' must be either a vector",
+                     "or a one-column matrix!"))
+      nsim <- nrow(cond)
+    }
+    if (!is.null(prev)) {
+      prev <- as.matrix(prev)
+      k    <- ncol(prev) + 1
+      nsim <- nrow(prev)      
+    }
   }
   
   marg <- eval(parse(text=paste(marg, "(pars=c(", 
                                 paste(pars, collapse=","), "))",sep=""  )))
+  # problem: we would need parameters of all previous and conditioning
+  # transitions to be used in the denominator of the conditional survival
+
   
   # in case of covariates and/or frailties
   if (!(is.null(nsim) || is.null(eta)))
@@ -41,22 +66,30 @@ function(theta=1,
   
   # simulation of uniforms
   u <- runif(nsim)
-  if (substring(clock, 1, 1) == "f" && !is.null(prev))
-    u <- u * margEta(prev, inv=FALSE)
+
+# - here problems!!! - #
+  if (substring(clock, 1, 1) == "f" && !is.null(cond))
+    u <- u * ( 1 + (margEta(cond, inv=FALSE)^(-theta)-1) / (
+      1 + apply(cbind(cond, eta), 1,
+                function(x) sum(margEta(x, inv=FALSE)^(-theta)-1))
+      ))^(1-k-1/theta)
+
+margEta(cond, inv=FALSE) #########
   
  
   # simulation of new times
-  if (k==1) { tk <- margEta(u, inv=TRUE)} else {
+  if (k==1) { tk <- margEta(u, inv=TRUE) } else {
     tk <- margEta(
       (1+(u^(theta/(theta*(1-k)-1))-1)*(
-        1+apply(cbind(prev, eta), 1,
+        1+apply(cbind(cond, eta), 1,
                 function(x) sum(margCovFrail(marg, lp=x[2])(x[1], inv=FALSE)^(-theta)-1))
+ # not correct! marginal marg, should use parameters of each previous marginal
       ))^(-1/theta),
     inv=TRUE)
   }
   
-  if (substring(clock, 1, 1) == "r" && !is.null(prev))
-    tk <- prev + tk
+  if (substring(clock, 1, 1) == "r" && !is.null(cond))
+    tk <- cond + tk
   
     tk <- matrix(as.numeric(tk), 
     dimnames=list(NULL,paste("T", k, sep="")))

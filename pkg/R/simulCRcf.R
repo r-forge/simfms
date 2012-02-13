@@ -120,6 +120,7 @@ simulCRcf <- function(nsim  = NULL,
                                   adcens=adcens, eta=eta,
                                   names=colnames(trans)[dest.states],
                                   clock=clock))
+  # Present states after the first transition
   pres.state <- apply(res[, (ncol(res)/2+1):ncol(res)], 1, function(x) {
     ifelse(sum(x) != 0, names(x)[which(x==1)], NA)
   })
@@ -129,13 +130,18 @@ simulCRcf <- function(nsim  = NULL,
   # ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #
   
   repeat {
+    # the states in which subjects are 
+    # and from which a new transition is possible
     startstates <- which(sapply(rownames(trans), function(x) {
         x %in% names(table(pres.state)) && sum(trans[x,], na.rm=TRUE)>0}))
     if (length(startstates) == 0) 
       break
-    for (ss in startstates){
+    for (ss in startstates) {
+      # ID numbers of patients who are at state ss
       whichss <- which(pres.state == rownames(trans)[ss])
+      # ID numbers of states to which they can move
       dest.states <- which(!is.na(trans[ss, ]))
+      # ID numbers of transitions from ss to dest.states
       transitions <- trans[ss, dest.states]
       
       res2 <- compTimes(claytonCRBlock(prev=res[whichss, paste("T",
@@ -148,15 +154,18 @@ simulCRcf <- function(nsim  = NULL,
                                        names=colnames(trans)[dest.states],
                                        clock=clock))
       for (ds in dest.states) {
+        # possible addition of new state variables
         if (! colnames(trans)[ds] %in% colnames(res))
           res <- cbind(res, matrix(cbind(res[, paste("T",
                                          rownames(trans)[ss], sep="")], 0),
                                    nrow(res), dimnames=list(NULL, 
             c(paste("T", colnames(trans)[ds], sep=""), colnames(trans)[ds]))))
-      res[whichss, paste(c("T",""), colnames(trans)[ds], sep="")] <-
-        res2[, paste(c("T",""), colnames(trans)[ds], sep="")]
+        
+        res[whichss, paste(c("T",""), colnames(trans)[ds], sep="")] <-
+          res2[    , paste(c("T",""), colnames(trans)[ds], sep="")]
       }
 
+      # New present states
       pres.state[whichss] <- apply(
         matrix(res2[, (ncol(res2)/2+1):ncol(res2)], length(whichss)), 
         1, function(x) {

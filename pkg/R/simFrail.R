@@ -1,9 +1,8 @@
-simFrail <-
-function(dist="gamma", 
-                     theta=.5, 
-                     nsim=NULL, 
-                     nclus=NULL, 
-                     csize=NULL) {
+simFrail <-function(dist="gamma", 
+                    theta=.5, 
+                    nsim=NULL, 
+                    nclus=NULL, 
+                    csize=NULL) {
   if (is.null(nsim)+is.null(nclus)+is.null(csize)==0) {
     if (!(length(csize)%in%c(1,nclus))) stop(
       "Number of clusters 'nclus' and cluster size(s) 'csize' incoherent!")

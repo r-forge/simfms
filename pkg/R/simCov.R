@@ -1,5 +1,4 @@
-simCov <-
-function(covs, nsim=3000){
+simCov <- function(covs, nsim=3000){
   if (is.null(nsim)) stop("Please, set the number of subjects 'nsim'!")
   if (is.null(cov)) stop("Please, set the covariates object 'covs'!")
   if (!is.list(covs)) stop("The covariates object 'covs' must be a list!")
