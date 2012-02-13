@@ -38,7 +38,7 @@
 
 simfms <- function(nsim  = NULL,
                    tmat  = NULL,
-                   clock = "reset",
+                   clock = "forward",
                    # Frailty
                    frailty = list(dist="gamma",
                                   par= .5),
@@ -63,6 +63,7 @@ simfms <- function(nsim  = NULL,
   nsim  <- checks$nsim
   nclus <- checks$nclus
   csize <- checks$csize
+  clock <- checks$clock
   rm("checks")
   data <- data.frame(ID=1:nsim)
   ###################################################### - END of CONTROLS - ###
@@ -80,11 +81,12 @@ simfms <- function(nsim  = NULL,
   if (!is.null(covs))
     data <- cbind(data,
                   simCov(covs=covs, nsim=nsim))
-#   eta.cov <- as.matrix(X.cov) %*%
-#     t(matrix(unlist(beta), nt, dimnames=list(NULL, names(beta))))
-#   attributes(res)$covariates <- list(dist = covs, beta = beta)
   #################################################### - END of COVARIATES - ###
-  
+
+  eta <- as.matrix(data[,-(1:3)]) %*% t(as.data.frame(beta)) +
+         matrix(rep(log(data$z), max(tmat, na.rm=TRUE)), nrow(data), 
+                dimnames=list(ID=data$ID, trans=1:max(tmat, na.rm=TRUE)))
+
   
 #   # Starting state
 #   startState <- which(colSums(tmat, na.rm=TRUE) == 0)
@@ -103,5 +105,5 @@ simfms(tmat=trans.cancer.reduced(),
        frailty=list(dist="gamma", par=.5),
        covs = list(age=function(x) rnorm(x, mean=60, sd=7),
                    treat=function(x) rbinom(x, 1, .5)),
-       beta = list(age=rep(1, 5), 
-                   treat=rep(1, 5)))
+       beta = list(age=-2:2, 
+                   treat=-2:2))

@@ -33,6 +33,10 @@ simFrail <-function(Fdist="gamma",
     res$Cluster <- as.factor(unlist(apply(cbind(1:nclus,csize), 1, 
                                           function(x) rep(x[1],x[2]))))
   } 
+  else if (substr(Fdist, 1, 2)=="no") {
+    res$z <- rep(1, nsim)
+    res$Cluster <- rep(0, nsim)
+  }
   else
     stop(paste("Unknown frailty distribution '", Fdist, "'!\n", sep=""))
   

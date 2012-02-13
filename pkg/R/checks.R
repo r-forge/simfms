@@ -51,19 +51,31 @@ checks <- function(nsim,
                    cens,
                    # Copula
                    ctheta) {
-  # Transition matrix
+  ### Transition matrix ###
   if (is.null(tmat))
     stop("No transition matrix 'tmat' defined!")
   if (sum(colSums(tmat, na.rm=TRUE) == 0) != 1)
     stop("Simulation method implemented only for one starting state!")
+  if (sum(1 - is.na(tmat[lower.tri(tmat)])) > 1)
+    stop("Only for acyclic multi-state structures can be used!")
   
-  # Frailties
+  ### Clock ###
+  if (is.null(clock)) {
+    clock <- "f"
+    warning("Parameter 'clock' is not set! Fixed to 'forward'.")
+  }
+  if (!(substring(clock, 1, 1) %in% c("r","f")))
+    stop("Clock parameter 'clock' must be either 'f' (forward) or 'r' (reset)!")
+  
+  ### Frailties ###
+  if (!is.list(frailty))
+    stop("The frailty object 'frailty' must be a list!")
   if (is.null(frailty$dist))
     stop("No frailty distribution is specified!")
   if (is.null(frailty$par))
     stop("No frailty parameter is specified!")
   
-  # Covariates and regression parameters
+  ### Covariates and regression parameters ###
   if (!is.list(covs))
     stop("The covariates object 'covs' must be a list!")
   if (!is.list(beta))
@@ -164,6 +176,7 @@ checks <- function(nsim,
 
   return(list(nsim  = nsim, 
               nclus = nclus,
-              csize = csize))
+              csize = csize,
+              clock = clock))
 }
 
