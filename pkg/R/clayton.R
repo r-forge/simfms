@@ -10,30 +10,26 @@ clayton <- function(theta=1,
     clock <- "r"
     warning("Parameter 'clock' is not set! Fixed to 'reset'.")
   }
-  if (!(substring(clock, 1, 1) %in% c("r","f")))
+  else if (!(substring(clock, 1, 1) %in% c("r","f")))
     stop("Clock parameter 'clock' must be either 'f' (forward) or 'r' (reset)!")
   
-  # starting state or conditioned?
+  # NEITHER CONDITIONING NOR PREVIOUS TIMES
   if (is.null(cond) && is.null(prev)){
-    if (is.null(nsim)) 
+    if (is.null(nsim)) # nsim NEEDED!
       stop(paste("\nProvide either the number of subjects to simulate 'nsim'",
                  "or \n the conditioning times 'cond' and/or",
                  "the previous times 'prev'!\n"))
     else
       k <- 1
   }
+  # EITHER CONDITIONING OR PREVIOUS TIMES
   else {
-    if (!is.null(nsim))
+    if (!is.null(nsim)) # nsim CANNOT BE ALTERED!
       stop(paste("\nProvide only one between",
                  "the number of subjects to simulate 'nsim'",
                  "and \n the conditioning times 'cond' and/or",
                  "the previous times 'prev'!\n"))
-    if (!is.null(cond) && !is.null(prev)) {
-      if (length(cond) != nrow(prev))
-        stop(paste("The number of previous times 'prev' (",
-                   nrow(prev),   ") and that of conditioning times 'cond' (",
-                   length(cond), ") do not match!", sep=""))
-    }
+    # WITH CONDITIONING PREVIOUS TIMES
     if (!is.null(cond)) {
       cond <- as.matrix(cond)
         if (ncol(cond)!=1)
@@ -41,10 +37,18 @@ clayton <- function(theta=1,
                      "or a one-column matrix!"))
       nsim <- nrow(cond)
     }
+    # WITH PREVIOUS TIMES
     if (!is.null(prev)) {
       prev <- as.matrix(prev)
       k    <- ncol(prev) + 1
       nsim <- nrow(prev)      
+    }
+    # BOTH CONDITIONING AND PREVIOUS TIMES
+    if (!is.null(cond) && !is.null(prev)) {
+      if (nrow(cond) != nrow(prev))
+        stop(paste("The number of previous times 'prev' (",
+                   nrow(prev),   ") and that of conditioning times 'cond' (",
+                   length(cond), ") do not match!", sep=""))
     }
   }
   
