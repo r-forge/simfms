@@ -69,6 +69,7 @@ simfms <- function(nsim  = NULL,
   nclus <- checks$nclus
   csize <- checks$csize
   clock <- checks$clock
+  marg  <- checks$marg
   rm("checks")
   data <- data.frame(ID=1:nsim)
   ###################################################### - END of CONTROLS - ###
@@ -85,8 +86,13 @@ simfms <- function(nsim  = NULL,
   if (!is.null(covs))
     data <- cbind(data, simCov(covs=covs, nsim=nsim))
   #################################################### - END of COVARIATES - ###
-
-  eta <- as.matrix(data[,-(1:3)]) %*% t(as.data.frame(beta)) +
+  
+  if (is.null(beta))
+    eta <- 0
+  else
+    eta <- as.matrix(data[,-(1:3)]) %*% t(as.data.frame(beta))
+  
+  eta <- eta +
          matrix(rep(log(data$z), max(tmat, na.rm=TRUE)), nrow(data), 
                 dimnames=list(ID=data$ID, trans=1:max(tmat, na.rm=TRUE)))
 
@@ -100,13 +106,6 @@ simfms <- function(nsim  = NULL,
 #   
 #   cat(c(nsim, nclus, csize))
   
-  return(data)
+  return(eta)
+  #return(data)
 }
-
-simfms(tmat=trans.cancer.reduced(),
-       nclus=5, csize=2,
-       frailty=list(dist="gamma", par=.5),
-       covs = list(age=function(x) rnorm(x, mean=60, sd=7),
-                   treat=function(x) rbinom(x, 1, .5)),
-       beta = list(age=-2:2, 
-                   treat=-2:2))

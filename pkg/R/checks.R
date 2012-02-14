@@ -69,7 +69,11 @@ checks <- function(nsim,
     clock <- "f"
     warning("Parameter 'clock' is not set! Fixed to 'forward'.")
   }
-  if (!(substring(clock, 1, 1) %in% c("r","f")))
+  if (tolower(substring(clock, 1, 1)) == "r")
+    clock <- "reset"
+  else if (tolower(substring(clock, 1, 1)) == "f")
+    clock <- "forward"
+  else
     stop("Clock parameter 'clock' must be either 'f' (forward) or 'r' (reset)!")
   
   ### Frailties ###
@@ -86,21 +90,21 @@ checks <- function(nsim,
                "'.", sep=""))
   
   ### Covariates and regression parameters ###
-  if (!is.list(covs))
+  if (!(is.list(covs) || is.null(covs)))
     stop("The covariates object 'covs' must be a list!")
-  if (!is.list(beta))
+  if (!(is.list(beta) || is.null(covs)))
     stop("The regression coefficient object 'beta' must be a list!")
   if (length(beta) != length(covs))
     stop(paste("\nThe number of covariates (", length(covs),
                ") is different from the number of regression coefficients (",
                length(beta), ")!\n", sep=""))
-  if (sum(sort(names(beta)) != sort(names(covs))) > 0)
-    stop(paste("\nThe covariates names in 'covs' ",
-               "are different from those in 'beta'!\n",
-               " names(covs):  ", paste(sort(names(covs)), collapse=", "),
-               "\n names(beta):  ", paste(sort(names(beta)), collapse=", "),
-               sep=""))
-  if (!is.null(beta)){
+  if (!is.null(beta)) {
+    if (any(sort(names(beta)) != sort(names(covs))))
+      stop(paste("\nThe covariates names in 'covs' ",
+                 "are different from those in 'beta'!\n",
+                 " names(covs):  ", paste(sort(names(covs)), collapse=", "),
+                 "\n names(beta):  ", paste(sort(names(beta)), collapse=", "),
+                 sep=""))
     if (diff(range((sapply(beta, length)))) != 0)
       stop("All beta coefficients in 'beta' must have the same length!")
     if (length(beta[[1]]) != max(tmat, na.rm=TRUE))
@@ -114,6 +118,15 @@ checks <- function(nsim,
     stop(paste("Baseline distributions not valid! \nThey must be one of '",
                paste(validbaselines, collapse="', '"),
                "'.", sep=""))
+  for (marEl in names(marg)) {
+    if (length(marg[[marEl]]) == 1)
+      marg[[marEl]] <- rep(marg[[marEl]], max(tmat, na.rm=TRUE))
+    else if (length(marg[[marEl]]) != max(tmat, na.rm=TRUE))
+      stop(paste("Invalid length of marg$", marEl,
+                 ": ", length(marg[[marEl]]),
+                 " instead of ", max(tmat, na.rm=TRUE),
+                 sep=""))
+  }
   
   ### Copula ###
   validcopulas <- c("clayton")
@@ -203,6 +216,7 @@ checks <- function(nsim,
   return(list(nsim  = nsim, 
               nclus = nclus,
               csize = csize,
-              clock = clock))
+              clock = clock,
+              marg  = marg))
 }
 
