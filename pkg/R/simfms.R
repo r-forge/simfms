@@ -30,6 +30,9 @@
 #                 dist : the name of the censoring distribution                #
 #                 par  : the vector of the censoring distribution parameters   #
 #                 admin: the time of administrative censoring                  #
+#   - copula    : the copula model. A list with components                     #
+#                 name : the name of the copula                                #
+#                 par  : the copula parameter                                  #
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
@@ -54,12 +57,14 @@ simfms <- function(nsim  = NULL,
                                 par = c(lambda=1, rho=1), 
                                 admin= 72),
                    # Copula
-                   ctheta= 1) {
+                   copula= list(name="clayton",
+                                par= 1)
+                   ) {
   ### - CONTROLS - #############################################################
   checks <- checks(nsim=nsim, tmat=tmat, clock=clock,
                    frailty=frailty, nclus=nclus,  csize=csize,
                    covs=covs, beta=beta, marg=marg, 
-                   cens=cens, ctheta=ctheta)
+                   cens=cens, copula=copula)
   nsim  <- checks$nsim
   nclus <- checks$nclus
   csize <- checks$csize
@@ -70,17 +75,15 @@ simfms <- function(nsim  = NULL,
 
   
   ### - FRAILTIES - ############################################################
-  data <- cbind(data, 
-                simFrail(Fdist=frailty$dist, 
-                         Fpar =frailty$par,
-                         nsim=nsim, nclus=nclus, csize=csize))
+  data <- cbind(data, simFrail(Fdist=frailty$dist, 
+                               Fpar =frailty$par,
+                               nsim=nsim, nclus=nclus, csize=csize))
   ##################################################### - END of FRAILTIES - ###
   
   
   ### - COVARIATES - ###########################################################
   if (!is.null(covs))
-    data <- cbind(data,
-                  simCov(covs=covs, nsim=nsim))
+    data <- cbind(data, simCov(covs=covs, nsim=nsim))
   #################################################### - END of COVARIATES - ###
 
   eta <- as.matrix(data[,-(1:3)]) %*% t(as.data.frame(beta)) +

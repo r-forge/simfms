@@ -30,6 +30,9 @@
 #                 dist : the name of the censoring distribution                #
 #                 par  : the vector of the censoring distribution parameters   #
 #                 admin: the time of administrative censoring                  #
+#   - copula    : the copula model. A list with components                     #
+#                 name : the name of the copula                                #
+#                 par  : the copula parameter                                  #
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
@@ -50,7 +53,9 @@ checks <- function(nsim,
                    marg,
                    cens,
                    # Copula
-                   ctheta) {
+                   copula= list(name="clayton",
+                                par= 1)
+                   ) {
   ### Transition matrix ###
   if (is.null(tmat))
     stop("No transition matrix 'tmat' defined!")
@@ -74,6 +79,11 @@ checks <- function(nsim,
     stop("No frailty distribution is specified!")
   if (is.null(frailty$par))
     stop("No frailty parameter is specified!")
+  validfrailties <- c("gamma", "none")
+  if (!(frailty$dist %in% validfrailties))
+    stop(paste("Frailty distribution not valid! \nIt must be one of '",
+               paste(validfrailties, collapse="', '"),
+               "'.", sep=""))
   
   ### Covariates and regression parameters ###
   if (!is.list(covs))
@@ -98,8 +108,23 @@ checks <- function(nsim,
                  "the number of transitions in 'tmat'!"))
   }
   
+  ### Marginals ###
+  validbaselines <- c("gompertz", "loglogistic", "lognormal", "weibull")
+  if (!all(marg$dist %in% validbaselines))
+    stop(paste("Baseline distributions not valid! \nThey must be one of '",
+               paste(validbaselines, collapse="', '"),
+               "'.", sep=""))
   
-  # -------------------------------------------------------------------------- #
+  ### Copula ###
+  validcopulas <- c("clayton")
+  if (!(copula$name %in% validcopulas))
+    stop(paste("Copula name not valid! \nIt must be one of '",
+               paste(validcopulas, collapse="', '"),
+               "'.", sep=""))
+  
+  
+  
+  ##############################################################################
   # --------------------------------- Sizes ---------------------------------- #
   ##############################################################################
   #[1]# ALL SIZES (nsim, nclus, csize) ARE GIVEN #
@@ -171,8 +196,9 @@ checks <- function(nsim,
   # last very last control
   if(nsim != sum(csize) || length(csize) != nclus)
     stop("\n --- something went wrong :( ---\n")
+  ##############################################################################
   # ------------------------------ end of Sizes ------------------------------ #
-  # -------------------------------------------------------------------------- #
+  ##############################################################################
 
   return(list(nsim  = nsim, 
               nclus = nclus,

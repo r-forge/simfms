@@ -13,32 +13,31 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 13, 2012                                   #
+#   Last modification on: February, 14, 2012                                   #
 ################################################################################
 
-simFrail <-function(Fdist="gamma", 
-                    Fpar=.5, 
+simFrail <-function(Fdist=NULL, 
+                    Fpar=NULL, 
                     nsim=NULL, 
                     nclus=NULL, 
                     csize=NULL) {
-  res <- NULL
-  attributes(res)$nsim  <- nsim
-  attributes(res)$nclus <- nclus
-  attributes(res)$csize <- csize
   
-  if (substr(Fdist, 1, 3)=="gam") {
+  if (substr(Fdist, 1, 3)=="gam") 
     z <- rgamma(nclus,  shape=1/Fpar, scale=Fpar)
-    z <- as.vector(unlist(apply(cbind(z,csize), 1, function(x) rep(x[1],x[2]))))
-    res$z <- z
-    res$Cluster <- as.factor(unlist(apply(cbind(1:nclus,csize), 1, 
-                                          function(x) rep(x[1],x[2]))))
-  } 
   else if (substr(Fdist, 1, 2)=="no") {
-    res$z <- rep(1, nsim)
-    res$Cluster <- rep(0, nsim)
+    nclus <- 1
+    csize <- nsim
+    z <- rep(1, nclus)
   }
   else
     stop(paste("Unknown frailty distribution '", Fdist, "'!\n", sep=""))
   
+  res <- NULL
+  res$z <- as.vector(unlist(mapply(rep, x=z, times=csize)))
+  res$Cluster <- as.factor(unlist(mapply(rep, x=1:nclus, times=csize)))
+  attributes(res)$nsim  <- nsim
+  attributes(res)$nclus <- nclus
+  attributes(res)$csize <- csize
+
   return(as.data.frame(res))
 }
