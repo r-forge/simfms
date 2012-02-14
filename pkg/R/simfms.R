@@ -36,7 +36,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 13, 2012                                   #
+#   Last modification on: February, 14, 2012                                   #
 ################################################################################
 
 simfms <- function(nsim  = NULL,
@@ -71,8 +71,16 @@ simfms <- function(nsim  = NULL,
   clock <- checks$clock
   marg  <- checks$marg
   rm("checks")
-  data <- data.frame(ID=1:nsim)
   ###################################################### - END of CONTROLS - ###
+
+  
+  ### - DATA OBJECT INITIALIZATION #############################################
+  events <- colnames(tmat)[colSums(tmat, na.rm=TRUE)>0]
+  data <- as.data.frame(cbind(1:nsim, matrix(NA, nsim, 2 * length(events))))
+  names(data) <- c("ID", sapply(events, function(x)
+                               paste(x, c("time", "status"), sep=".")))
+  
+  #################################### - END of DATA OBJECT INITIALIZATION - ###
 
   
   ### - FRAILTIES - ############################################################
@@ -87,15 +95,17 @@ simfms <- function(nsim  = NULL,
     data <- cbind(data, simCov(covs=covs, nsim=nsim))
   #################################################### - END of COVARIATES - ###
   
+  ### - LINEAR PREDICTORS - ####################################################
+  fstCov <- 3 + 2 * length(events)
   if (is.null(beta))
-    eta <- 0
-  else
-    eta <- as.matrix(data[,-(1:3)]) %*% t(as.data.frame(beta))
+    eta <- 0  else
+      eta <- as.matrix(data[,-(1:fstCov)]) %*% t(as.data.frame(beta))
   
   eta <- eta +
          matrix(rep(log(data$z), max(tmat, na.rm=TRUE)), nrow(data), 
                 dimnames=list(ID=data$ID, trans=1:max(tmat, na.rm=TRUE)))
-
+  ############################################# - END of LINEAR PREDICTORS - ###
+  
   
 #   # Starting state
 #   startState <- which(colSums(tmat, na.rm=TRUE) == 0)
@@ -106,6 +116,5 @@ simfms <- function(nsim  = NULL,
 #   
 #   cat(c(nsim, nclus, csize))
   
-  return(eta)
-  #return(data)
+  return(data)
 }

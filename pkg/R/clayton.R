@@ -8,21 +8,23 @@
 #       times and distributions                                                #
 #                                                                              #
 #  Its parameters are                                                          #
-#   - theta     : the copula  parameter                                        #
+#   - par       : the copula parameter par                                   #
 #   - condTime  : the time of the possible conditioning transition,            #
 #                 with the transition number as name                           #
 #   - condMarg  : the marginal baseline function of the possible               #
 #                 conditioning transition,                                     #
 #                 with the transition number as name                           #
-#   - prevTime  : the times of the posssible previous transitions,             #
+#   - prevTimes : the times of the posssible previous transitions,             #
 #                 with the transition numbers as names                         #
-#   - prevMarg  : the marginal baseline functions of the possible              #
-#                 conditioning transitions,                                    #
+#   - prevMargs : the marginal baseline functions of the possible              #
+#                 previous transitions,                                        #
 #                 with the transition numbers as names                         #
 #   - marg      : the marginal baseline function of the transition to simulate #
 #   - eta       : the vector of the linear predictors, of length k,            #
-#                 k = 1 + the number of previous transitions                   #
-#                       + 1 if there is a conditioning transition              #
+#                 in the order:                                                #
+#                   1 (possibly) for the conditioning transition               #
+#                   those of the (possible) previous transitions               #
+#                   1 for the present transition                               #
 #   - clock     : either 'forward' or 'reset'                                  #
 #                                                                              #
 #                                                                              #
@@ -30,7 +32,7 @@
 #   Last modification on: February, 14, 2012                                   #
 ################################################################################
 
-clayton <- function(theta = 1,
+clayton <- function(par,
                     condTime  = NULL,
                     condMarg  = NULL,
                     prevTimes = NULL,
@@ -41,30 +43,33 @@ clayton <- function(theta = 1,
   k <- 1 + length(condTime) + length(prevTimes)
   prevTimes <- c(condTime, prevTimes)
   prevMargs <- c(condMarg, prevMargs)
+  eta <- eta
   
   ### DENOMINATOR: 1 + sum_{j=1}^{k-1}[ S_j(t_j)^(-th exp(eta_j)) - 1] #########
   denom <- 2 - k 
   if (length(prevTimes))
     denom <- denom +
-      sum(sapply(names(prevMargs), 
-                 function(x) prevMargs[[x]](prevTimes[x])^(
-                   - theta * exp(eta[x])),
+      sum(sapply(1:length(prevMargs),
+                 function(x) prevMargs[[x]](prevTimes[[x]])^(
+                   - par * exp(eta[x])),
                  USE.NAMES=FALSE))
   ####################################################### END of DENOMINATOR ###
   
   ### CLOCK FORWARD CORRECTION #################################################
-  if (clock == "reset")
+  if (clock == "forward" && !is.null(condTime)) {
+    clock <- (1 + marg(condTime)^(-par * exp(eta[ncol(eta)])) / denom)^(
+        1 - k - 1 / par)
+  }
+  else
     clock <- 1
-  else if (clock == "forward")
-    clock <- (1 + marg(condTime)^(-theta * exp(eta[names(marg)])) / denom)^(
-      1 - k - 1 / theta)
   ########################################## END of CLOCK FORWARD CORRECTION ###
       
-  T <- function(u) {
-    arg <- (1 + denom * ((u * clock)^(k - 1 + 1 / theta) - 1))^(
-      - 1 / (theta * exp(eta[names(marg)])))
+  u <- runif(n=1, min=0, max=1)
+  #T <- function(u) {
+    arg <- (1 + denom * ((u * clock)^(1 / (1 - k - 1 / par)) - 1))^(
+      - 1 / (par * exp(eta[ncol(eta)])))
     return(marg(arg, inv=TRUE))
-  }
+  #}
   return(T)
 }
 
