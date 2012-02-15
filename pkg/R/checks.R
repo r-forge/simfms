@@ -113,6 +113,9 @@ checks <- function(nsim,
   }
   
   ### Marginals ###
+  if (!is.list(marg) || is.null(marg$dist))
+    stop(paste("The marginal baselines object 'marg' must be a list with",
+               "at least an element 'dist'!"))
   validbaselines <- c("gompertz", "loglogistic", "lognormal", "weibull")
   if (!all(marg$dist %in% validbaselines))
     stop(paste("Baseline distributions not valid! \nThey must be one of '",
@@ -124,6 +127,26 @@ checks <- function(nsim,
     else if (length(marg[[marEl]]) != max(tmat, na.rm=TRUE))
       stop(paste("Invalid length of marg$", marEl,
                  ": ", length(marg[[marEl]]),
+                 " instead of ", max(tmat, na.rm=TRUE),
+                 sep=""))
+  }
+  
+  ### Censoring ###
+  if (!is.list(cens) || is.null(cens$dist))
+    stop(paste("The censoring distributions object 'cens' must be a list with",
+               "at least an element 'dist'!"))
+  if (!all(cens$dist %in% validbaselines))
+    stop(paste("Censoring distributions not valid! \nThey must be one of '",
+               paste(validbaselines, collapse="', '"),
+               "'.", sep=""))
+  if (is.null(cens$admin))
+    cens$admin <- Inf
+  for (marEl in names(cens)) {
+    if (length(cens[[marEl]]) == 1)
+      cens[[marEl]] <- rep(cens[[marEl]], max(tmat, na.rm=TRUE))
+    else if (length(cens[[marEl]]) != max(tmat, na.rm=TRUE))
+      stop(paste("Invalid length of cens$", marEl,
+                 ": ", length(cens[[marEl]]),
                  " instead of ", max(tmat, na.rm=TRUE),
                  sep=""))
   }

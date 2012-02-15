@@ -1,1 +1,6 @@
-exportPattern("^[[:alpha:]]+")
+export(
+  simfms,
+  trans.cancer.reduced,
+  trans.cancer,
+  trans.cancer.extended
+)

@@ -1,3 +1,50 @@
+################################################################################
+#  Simualation of times for a comepeting risks block                           #
+################################################################################
+#                                                                              #
+#  Computes iteratively the times of a competing risks blcock, according       #
+#     to a given copula model, with a possible conditioning event into the     #
+#     present state and conditional, too, to the previously simulated          #
+#     competing events in the block                                            #
+#                                                                              #
+#  Its parameters are                                                          #
+#   - data      : the dataframe with data simulated up to now                  #
+#   - inTrans   : the id number of the incoming transition                     #
+#   - subjs     : the id numbers of the subjects concerned                     #
+#   - nsim      : the number of subjects to simulate                           #
+#   - tmat      : the trnasitions matrix                                       #
+#   - clock     : either 'forward' or 'reset'                                  #
+#   - frailty   : the frailty term specifications. A list with components      #
+#                 dist: the name of the frailty distribution                   #
+#                 par : the frailty parameter(s) value                         #
+#   - nclus     : the number of clusters to simulate                           #
+#   - csize     : the size(s) of cluster                                       #
+#   - covs      : the covariates to simulate. A list with components           #
+#                 nameOfCovariate = simulationfunction                         #
+#   - beta      : the regression coefficients for covariates. A list of the    #
+#                 same length as 'covs', with elements                         #
+#                 nameOfCovariate = a vector of the same length as the number  #
+#                 of transitions in 'tmat'                                     #
+#   - marg      : the marginal baseline hazards. A list with components        #
+#                 dist    : the name of the baseline hazard distribution       #
+#                           (either one value or as many as the number         #
+#                            of transitions in 'tmat')                         #
+#                 eachpar : each baseline parameter                            #
+#                           (either one value or as many as the number         #
+#                            of transitions in 'tmat')                         #
+#   - cens      : the censoring time distribution. A list with components      #
+#                 dist : the name of the censoring distribution                #
+#                 par  : the vector of the censoring distribution parameters   #
+#                 admin: the time of administrative censoring                  #
+#   - copula    : the copula model. A list with components                     #
+#                 name : the name of the copula                                #
+#                 par  : the copula parameter                                  #
+#                                                                              #
+#                                                                              #
+#   Date: February, 13, 2012                                                   #
+#   Last modification on: February, 15, 2012                                   #
+################################################################################
+
 scan.tmat <- function(data,
                       inTrans,
                       subjs,
@@ -23,17 +70,13 @@ scan.tmat <- function(data,
     atState <- colnames(tmat)[which(tmat == inTrans, arr.ind=TRUE)[2]]
     condTime <- data[subjs, paste(atState, "time", sep=".")]
     condMarg <- extractMargs(as.data.frame(marg)[inTrans,])
-#       eval(parse(text=marg[inTrans]$dist))(
-#       pars=eval(parse(text=paste("list(",
-#                                  paste(names(marg)[names(marg) != "dist"],
-#                                        as.data.frame(marg)[inTrans, 
-#                                                            names(marg) !="dist"],
-#                                        sep="=", collapse=", "),
-#                                  ")"))))        
   }
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
+  # if ending state, then return results
+  if (length(outTrans == 0))
+    return(data)
   ################################################### - END of PREPARATION - ###
-      
+
   
   ### - RECURSION on the COMPETING RISKS BLOCK - ###############################
   for (ot in outTrans) { # ot, the number of the transition in tmat!!!!!!!!!!!!!
@@ -58,12 +101,6 @@ scan.tmat <- function(data,
   }
   ########################################## - END of RECURSION on the CRs - ###
   
-  # if no  children, then return results
-  if (length(outTrans == 0))
-    return(data)
-  # else
-  else
-    {}
   ## pass results to its children
   ## merge their results
   ## return results

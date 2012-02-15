@@ -8,7 +8,7 @@
 #       times and distributions                                                #
 #                                                                              #
 #  Its parameters are                                                          #
-#   - par       : the copula parameter par                                   #
+#   - par       : the copula parameter par                                     #
 #   - condTime  : the time of the possible conditioning transition,            #
 #                 with the transition number as name                           #
 #   - condMarg  : the marginal baseline function of the possible               #

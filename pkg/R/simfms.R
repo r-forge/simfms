@@ -20,15 +20,19 @@
 #                 nameOfCovariate = a vector of the same length as the number  #
 #                 of transitions in 'tmat'                                     #
 #   - marg      : the marginal baseline hazards. A list with components        #
-#                 dist    : the name of the baseline hazard distribution       #
+#                 dist    : the name of the baseline hazard distributions      #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
 #                 eachpar : each baseline parameter                            #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
-#   - cens      : the censoring time distribution. A list with components      #
-#                 dist : the name of the censoring distribution                #
-#                 par  : the vector of the censoring distribution parameters   #
+#   - cens      : the censoring time distributions. A list with components     #
+#                 dist : the name of the censoring distributions               #
+#                           (either one value or as many as the number         #
+#                            of transitions in 'tmat')                         #
+#                 eachpar : each censoring distribution parameter              #
+#                           (either one value or as many as the number         #
+#                            of transitions in 'tmat')                         #
 #                 admin: the time of administrative censoring                  #
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
@@ -54,7 +58,7 @@ simfms <- function(nsim  = NULL,
                    marg  = list(dist="weibull",
                                 lambda=1, rho=1), 
                    cens  = list(dist="weibull", 
-                                par = c(lambda=1, rho=1), 
+                                lambda=1, rho=1, 
                                 admin= 72),
                    # Copula
                    copula= list(name="clayton",
