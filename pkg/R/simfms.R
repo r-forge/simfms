@@ -28,11 +28,13 @@
 #                            of transitions in 'tmat')                         #
 #   - cens      : the censoring time distributions. A list with components     #
 #                 dist : the name of the censoring distributions               #
-#                           (either one value or as many as the number         #
-#                            of transitions in 'tmat')                         #
+#                           (either one value or as many as the number of      #
+#                            possible starting states in 'tmat',               #
+#                            possibly with states' names)                      #
 #                 eachpar : each censoring distribution parameter              #
-#                           (either one value or as many as the number         #
-#                            of transitions in 'tmat')                         #
+#                           (either one value or as many as the number of      #
+#                            possible starting states in 'tmat',               #
+#                            possibly with states' names)                      #
 #                 admin: the time of administrative censoring                  #
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
@@ -43,27 +45,27 @@
 #   Last modification on: February, 14, 2012                                   #
 ################################################################################
 
-simfms <- function(nsim  = NULL,
-                   tmat  = NULL,
-                   clock = "forward",
-                   # Frailty
-                   frailty = list(dist="gamma",
-                                  par= .5),
-                   nclus = NULL, 
-                   csize = NULL,
-                   # Covariates
-                   covs = NULL,
-                   beta = NULL,
-                   # Marginals
-                   marg  = list(dist="weibull",
-                                lambda=1, rho=1), 
-                   cens  = list(dist="weibull", 
-                                lambda=1, rho=1, 
-                                admin= 72),
-                   # Copula
-                   copula= list(name="clayton",
-                                par= 1)
-                   ) {
+# simfms <- function(nsim  = NULL,
+#                    tmat  = NULL,
+#                    clock = "forward",
+#                    # Frailty
+#                    frailty = list(dist="gamma",
+#                                   par= .5),
+#                    nclus = NULL, 
+#                    csize = NULL,
+#                    # Covariates
+#                    covs = NULL,
+#                    beta = NULL,
+#                    # Marginals
+#                    marg  = list(dist="weibull",
+#                                 lambda=1, rho=1), 
+#                    cens  = list(dist="weibull", 
+#                                 lambda=1, rho=1, 
+#                                 admin= 72),
+#                    # Copula
+#                    copula= list(name="clayton",
+#                                 par= 1)
+#                    ) {
   ### - CONTROLS - #############################################################
   checks <- checks(nsim=nsim, tmat=tmat, clock=clock,
                    frailty=frailty, nclus=nclus,  csize=csize,
@@ -74,13 +76,15 @@ simfms <- function(nsim  = NULL,
   csize <- checks$csize
   clock <- checks$clock
   marg  <- checks$marg
+  cens  <- checks$cens
   rm("checks")
   ###################################################### - END of CONTROLS - ###
 
   
   ### - DATA OBJECT INITIALIZATION #############################################
   events <- colnames(tmat)[colSums(tmat, na.rm=TRUE)>0]
-  data <- as.data.frame(cbind(1:nsim, matrix(NA, nsim, 2 * length(events))))
+  data <- as.data.frame(cbind(1:nsim, matrix(NA, nsim, length(events)),
+                              matrix(0, nsim, length(events))))
   names(data) <- c("ID", sapply(events, function(x)
                                paste(x, c("time", "status"), sep=".")))
   
@@ -120,5 +124,5 @@ simfms <- function(nsim  = NULL,
 #   
 #   cat(c(nsim, nclus, csize))
   
-  return(data)
-}
+#   return(data)
+# }

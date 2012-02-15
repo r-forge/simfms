@@ -29,7 +29,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 14, 2012                                                   #
-#   Last modification on: February, 14, 2012                                   #
+#   Last modification on: February, 15, 2012                                   #
 ################################################################################
 
 clayton <- function(par,
@@ -43,7 +43,6 @@ clayton <- function(par,
   k <- 1 + length(condTime) + length(prevTimes)
   prevTimes <- c(condTime, prevTimes)
   prevMargs <- c(condMarg, prevMargs)
-  eta <- eta
   
   ### DENOMINATOR: 1 + sum_{j=1}^{k-1}[ S_j(t_j)^(-th exp(eta_j)) - 1] #########
   denom <- 2 - k 
@@ -65,11 +64,9 @@ clayton <- function(par,
   ########################################## END of CLOCK FORWARD CORRECTION ###
       
   u <- runif(n=1, min=0, max=1)
-  #T <- function(u) {
     arg <- (1 + denom * ((u * clock)^(1 / (1 - k - 1 / par)) - 1))^(
       - 1 / (par * exp(eta[ncol(eta)])))
     return(marg(arg, inv=TRUE))
-  #}
   return(T)
 }
 

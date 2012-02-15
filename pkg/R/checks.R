@@ -26,10 +26,13 @@
 #                 eachpar : each baseline parameter                            #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
-#   - cens      : the censoring time distribution. A list with components      #
-#                 dist : the name of the censoring distribution                #
-#                 par  : the vector of the censoring distribution parameters   #
-#                 admin: the time of administrative censoring                  #
+#   - cens      : the censoring time distributions. A list with components     #
+#                 dist : the name of the censoring distributions               #
+#                           (either one value or as many as the number of      #
+#                            possible starting states in 'tmat')               #
+#                 eachpar : each censoring distribution parameter              #
+#                           (either one value or as many as the number of      #
+#                            possible starting states in 'tmat')               #
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
 #                 par  : the copula parameter                                  #
@@ -141,13 +144,30 @@ checks <- function(nsim,
                "'.", sep=""))
   if (is.null(cens$admin))
     cens$admin <- Inf
-  for (marEl in names(cens)) {
-    if (length(cens[[marEl]]) == 1)
-      cens[[marEl]] <- rep(cens[[marEl]], max(tmat, na.rm=TRUE))
-    else if (length(cens[[marEl]]) != max(tmat, na.rm=TRUE))
-      stop(paste("Invalid length of cens$", marEl,
-                 ": ", length(cens[[marEl]]),
-                 " instead of ", max(tmat, na.rm=TRUE),
+  
+  censNames <- rownames(tmat)[rowSums(tmat, na.rm=TRUE) > 0]
+  for (censEl in names(cens)) {
+    if (length(cens[[censEl]]) == 1) {
+      cens[[censEl]] <- rep(cens[[censEl]], length(censNames))
+      names(cens[[censEl]]) <- censNames
+    } else
+      if (length(cens[[censEl]]) == length(censNames)) {
+        if (is.null(names(cens[[censEl]]))) {
+          names(cens[[censEl]]) <- censNames
+        } else 
+          if (!all(names(cens[[censEl]]) %in% censNames))
+            stop(paste("The names of elements of 'cens$", censEl, 
+                       "' do not match the names",
+                       "of the non-final states in 'tmat'!",
+                       "\nNon-final states in 'tmat':\n  ", 
+                       paste(sort(censNames), collapse=", "),
+                       "\nNames of cens$", censEl, "':\n  ", 
+                       paste(sort(names(cens[[censEl]])), collapse=", "),
+                       sep=""))                       
+    } else
+      stop(paste("Invalid length of cens$", censEl,
+                 ": ", length(cens[[censEl]]),
+                 " instead of ", sum(rowSums(tmat, na.rm=TRUE) > 0),
                  sep=""))
   }
   
@@ -240,6 +260,7 @@ checks <- function(nsim,
               nclus = nclus,
               csize = csize,
               clock = clock,
-              marg  = marg))
+              marg  = marg,
+              cens  = cens))
 }
 

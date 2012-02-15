@@ -32,10 +32,13 @@
 #                 eachpar : each baseline parameter                            #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
-#   - cens      : the censoring time distribution. A list with components      #
-#                 dist : the name of the censoring distribution                #
-#                 par  : the vector of the censoring distribution parameters   #
-#                 admin: the time of administrative censoring                  #
+#   - cens      : the censoring time distributions. A list with components     #
+#                 dist : the name of the censoring distributions               #
+#                           (either one value or as many as the number of      #
+#                            possible starting states in 'tmat')               #
+#                 eachpar : each censoring distribution parameter              #
+#                           (either one value or as many as the number of      #
+#                            possible starting states in 'tmat')               #
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
 #                 par  : the copula parameter                                  #
@@ -45,22 +48,22 @@
 #   Last modification on: February, 15, 2012                                   #
 ################################################################################
 
-scan.tmat <- function(data,
-                      inTrans,
-                      subjs,
-                      # Other parameters
-                      nsim,
-                      tmat,
-                      clock,
-                      frailty,
-                      nclus,
-                      csize,
-                      covs,
-                      beta,
-                      marg,
-                      cens,
-                      copula
-                      ){
+# scan.tmat <- function(data,
+#                       inTrans,
+#                       subjs,
+#                       # Other parameters
+#                       nsim,
+#                       tmat,
+#                       clock,
+#                       frailty,
+#                       nclus,
+#                       csize,
+#                       covs,
+#                       beta,
+#                       marg,
+#                       cens,
+#                       copula
+#                       ){
   ### - PREPARATION - ##########################################################
   # Present state and Conditioning transition infos
   if (is.null(inTrans)){ # from the starting state
@@ -73,12 +76,12 @@ scan.tmat <- function(data,
   }
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
   # if ending state, then return results
-  if (length(outTrans == 0))
+  if (length(outTrans) == 0)
     return(data)
   ################################################### - END of PREPARATION - ###
 
   
-  ### - RECURSION on the COMPETING RISKS BLOCK - ###############################
+  ### - COMPETING EVENTS TIMES - ###############################################
   for (ot in outTrans) { # ot, the number of the transition in tmat!!!!!!!!!!!!!
     ot.N <- which(outTrans == ot) # ot.N its rank in the CRs block!!!!!!!!!!!!!!
     # Previous transition(s) infos
@@ -99,9 +102,32 @@ scan.tmat <- function(data,
         eta=eta[x, c(inTrans, outTrans[1:ot.N]), drop=FALSE], 
         clock=clock))
   }
-  ########################################## - END of RECURSION on the CRs - ###
+  ######################################## - END of COMPETING EVENTS TIMES - ###
   
-  ## pass results to its children
-  ## merge their results
-  ## return results
-}
+  
+  ### - CENSORING - ############################################################
+  C.time <- extractMargs(as.data.frame(cens[names(cens)!="admin"])[atState,])(
+    runif(length(subjs)), inv=TRUE)
+  ##################################################### - END of CENSORING - ###
+    
+  
+  ### - UPDATE DATASET - #######################################################
+  data[subjs, sapply(c("time", "status"), function(x)
+    paste(names(outTrans), x, sep="."))] <-
+      t(apply(cbind(data[subjs, paste(names(outTrans), "time", sep=".")],
+                    C.time=C.time), 1, function(x)
+                      c(rep(min(x), length(x)-1), 
+                        1:(length(x)-1) == which.min(x))))
+  ################################################ - END of UPDATE DATASET - ###
+  
+  
+  ### - NEXT EVENTS TIMES - ####################################################
+  for (ot in outTrans) { # ot, the number of the transition in tmat
+    # find out concerned subjects
+    # call scan.tmat on them
+  }
+  ############################################# - END of NEXT EVENTS TIMES - ###
+  
+# }
+  
+  
