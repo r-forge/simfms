@@ -6,7 +6,7 @@
 #                                                                              #
 #  Its parameters are                                                          #
 #   - nsim      : the number of subjects to simulate                           #
-#   - tmat      : the trnasitions matrix                                       #
+#   - tmat      : the transitions matrix                                       #
 #   - clock     : either 'forward' or 'reset'                                  #
 #   - frailty   : the frailty term specifications. A list with components      #
 #                 dist: the name of the frailty distribution                   #
