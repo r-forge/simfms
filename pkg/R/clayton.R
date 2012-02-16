@@ -29,7 +29,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 14, 2012                                                   #
-#   Last modification on: February, 15, 2012                                   #
+#   Last modification on: February, 16, 2012                                   #
 ################################################################################
 
 clayton <- function(par,
@@ -46,12 +46,13 @@ clayton <- function(par,
   
   ### DENOMINATOR: 1 + sum_{j=1}^{k-1}[ S_j(t_j)^(-th exp(eta_j)) - 1] #########
   denom <- 2 - k 
-  if (length(prevTimes))
+  if (length(prevTimes)) {
     denom <- denom +
       sum(sapply(1:length(prevMargs),
                  function(x) prevMargs[[x]](prevTimes[[x]])^(
                    - par * exp(eta[x])),
                  USE.NAMES=FALSE))
+  }
   ####################################################### END of DENOMINATOR ###
   
   ### CLOCK FORWARD CORRECTION #################################################
@@ -64,10 +65,17 @@ clayton <- function(par,
   ########################################## END of CLOCK FORWARD CORRECTION ###
       
   u <- runif(n=1, min=0, max=1)
-    arg <- (1 + denom * ((u * clock)^(1 / (1 - k - 1 / par)) - 1))^(
-      - 1 / (par * exp(eta[ncol(eta)])))
-    return(marg(arg, inv=TRUE))
-  return(T)
+  arg <- (1 + denom * ((u * clock)^(1 / (1 - k - 1 / par)) - 1))^(
+    - 1 / (par * exp(eta[ncol(eta)])))
+  T <- marg(arg, inv=TRUE)
+
+  ### CLOCK RESET CORRECTION ###################################################
+  if (clock == "reset" && !is.null(condTime)) {
+    T <- condTime +  T
+  }
+  ############################################ END of CLOCK RESET CORRECTION ###
+  
+  return(marg(arg, inv=TRUE))
 }
 
 

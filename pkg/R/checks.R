@@ -39,7 +39,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 13, 2012                                   #
+#   Last modification on: February, 15, 2012                                   #
 ################################################################################
 
 checks <- function(nsim,

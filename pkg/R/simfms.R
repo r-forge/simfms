@@ -42,30 +42,30 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 14, 2012                                   #
+#   Last modification on: February, 16, 2012                                   #
 ################################################################################
 
-# simfms <- function(nsim  = NULL,
-#                    tmat  = NULL,
-#                    clock = "forward",
-#                    # Frailty
-#                    frailty = list(dist="gamma",
-#                                   par= .5),
-#                    nclus = NULL, 
-#                    csize = NULL,
-#                    # Covariates
-#                    covs = NULL,
-#                    beta = NULL,
-#                    # Marginals
-#                    marg  = list(dist="weibull",
-#                                 lambda=1, rho=1), 
-#                    cens  = list(dist="weibull", 
-#                                 lambda=1, rho=1, 
-#                                 admin= 72),
-#                    # Copula
-#                    copula= list(name="clayton",
-#                                 par= 1)
-#                    ) {
+simfms <- function(nsim  = NULL,
+                   tmat  = NULL,
+                   clock = "forward",
+                   # Frailty
+                   frailty = list(dist="gamma",
+                                  par= .5),
+                   nclus = NULL, 
+                   csize = NULL,
+                   # Covariates
+                   covs = NULL,
+                   beta = NULL,
+                   # Marginals
+                   marg  = list(dist="weibull",
+                                lambda=1, rho=1), 
+                   cens  = list(dist="weibull", 
+                                lambda=1, rho=1, 
+                                admin= 72),
+                   # Copula
+                   copula= list(name="clayton",
+                                par= 1)
+                   ) {
   ### - CONTROLS - #############################################################
   checks <- checks(nsim=nsim, tmat=tmat, clock=clock,
                    frailty=frailty, nclus=nclus,  csize=csize,
@@ -82,11 +82,11 @@
 
   
   ### - DATA OBJECT INITIALIZATION #############################################
-  events <- colnames(tmat)[colSums(tmat, na.rm=TRUE)>0]
-  data <- as.data.frame(cbind(1:nsim, matrix(NA, nsim, length(events)),
-                              matrix(0, nsim, length(events))))
-  names(data) <- c("ID", sapply(events, function(x)
-                               paste(x, c("time", "status"), sep=".")))
+  data <- as.data.frame(cbind(1:nsim, matrix(c(NA, 0), 
+                                             nsim, 2 * max(tmat, na.rm=TRUE),
+                                             byrow=TRUE)))
+  names(data) <- c("ID", sapply(1:max(tmat, na.rm=TRUE), function(x)
+    paste("tr", x, c(".time", ".status"), sep="")))
   
   #################################### - END of DATA OBJECT INITIALIZATION - ###
 
@@ -104,25 +104,42 @@
   #################################################### - END of COVARIATES - ###
   
   ### - LINEAR PREDICTORS - ####################################################
-  fstCov <- 3 + 2 * length(events)
+  # Covariates constributions
+  notCov <- 1:(3 +                      # ID, z, Cluster
+    2 * max(tmat, na.rm=TRUE))  # tr1.time, tr1.status, ...
   if (is.null(beta))
     eta <- 0  else
-      eta <- as.matrix(data[,-(1:fstCov)]) %*% t(as.data.frame(beta))
+      eta <- as.matrix(data[,-notCov]) %*% t(as.data.frame(beta))
   
+  # Frailty contribution
   eta <- eta +
          matrix(rep(log(data$z), max(tmat, na.rm=TRUE)), nrow(data), 
                 dimnames=list(ID=data$ID, trans=1:max(tmat, na.rm=TRUE)))
   ############################################# - END of LINEAR PREDICTORS - ###
+
+  ### - COMPUTATION of TRANSITION TIMES - ######################################
+  # Detailed data for each transition
+  data <- scan.tmat(data=data, inTrans=NULL, subjs=1:nrow(data),
+                    eta=eta,   tmat=tmat,    clock=clock,
+                    marg=marg, cens=cens,    copula=copula)
   
+  # Possible arrival states
+  events <- colnames(tmat)[colSums(tmat, na.rm=TRUE) > 0]
   
-#   # Starting state
-#   startState <- which(colSums(tmat, na.rm=TRUE) == 0)
-#   if (length(startState) > 1)
-#     stop(paste("This method is implmented for multi-state structures",
-#                "with only one starting state!"))
-#   which(!is.na(tmat[startState, ]))
-#   
-#   cat(c(nsim, nclus, csize))
+  # Summarization into possible arrival states
+  resdata <- as.data.frame(lapply(events, function(x) {
+    res <- cbind(apply(data[, paste("tr", sort(tmat[, x]), ".time", sep=""),
+                            drop=FALSE], 
+                       1, function(x) {
+                         if (all(is.na(x))) NA else
+                         max(x, na.rm=TRUE)}),
+                 apply(data[, paste("tr", sort(tmat[, x]), ".status", sep=""),
+                            drop=FALSE], 
+                       1, max, na.rm=TRUE))
+    colnames(res) <- paste(x, c("time", "status"), sep=".")
+    return(res)
+  }))
+  ########################################## - END of COMPUTATION of TIMES - ###
   
-#   return(data)
-# }
+  return(resdata)
+}

@@ -11,20 +11,11 @@
 #   - data      : the dataframe with data simulated up to now                  #
 #   - inTrans   : the id number of the incoming transition                     #
 #   - subjs     : the id numbers of the subjects concerned                     #
-#   - nsim      : the number of subjects to simulate                           #
+#   - eta       : the linear predictors matrix, with                           #
+#                 as many rows as data                                         #
+#                 as many columns as the number of transitions in 'tmat'       #
 #   - tmat      : the trnasitions matrix                                       #
 #   - clock     : either 'forward' or 'reset'                                  #
-#   - frailty   : the frailty term specifications. A list with components      #
-#                 dist: the name of the frailty distribution                   #
-#                 par : the frailty parameter(s) value                         #
-#   - nclus     : the number of clusters to simulate                           #
-#   - csize     : the size(s) of cluster                                       #
-#   - covs      : the covariates to simulate. A list with components           #
-#                 nameOfCovariate = simulationfunction                         #
-#   - beta      : the regression coefficients for covariates. A list of the    #
-#                 same length as 'covs', with elements                         #
-#                 nameOfCovariate = a vector of the same length as the number  #
-#                 of transitions in 'tmat'                                     #
 #   - marg      : the marginal baseline hazards. A list with components        #
 #                 dist    : the name of the baseline hazard distribution       #
 #                           (either one value or as many as the number         #
@@ -45,25 +36,20 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 15, 2012                                   #
+#   Last modification on: February, 16, 2012                                   #
 ################################################################################
 
-# scan.tmat <- function(data,
-#                       inTrans,
-#                       subjs,
-#                       # Other parameters
-#                       nsim,
-#                       tmat,
-#                       clock,
-#                       frailty,
-#                       nclus,
-#                       csize,
-#                       covs,
-#                       beta,
-#                       marg,
-#                       cens,
-#                       copula
-#                       ){
+scan.tmat <- function(data,
+                      inTrans,
+                      subjs,
+                      eta,
+                      # Other parameters from simfms()
+                      tmat,
+                      clock,
+                      marg,
+                      cens,
+                      copula
+                      ){
   ### - PREPARATION - ##########################################################
   # Present state and Conditioning transition infos
   if (is.null(inTrans)){ # from the starting state
@@ -71,7 +57,7 @@
     condTime <- condMarg <- NULL
   } else { # from all the other states
     atState <- colnames(tmat)[which(tmat == inTrans, arr.ind=TRUE)[2]]
-    condTime <- data[subjs, paste(atState, "time", sep=".")]
+    condTime <- data[, paste("tr", inTrans, ".time", sep="")]
     condMarg <- extractMargs(as.data.frame(marg)[inTrans,])
   }
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
@@ -88,18 +74,18 @@
     if (ot.N == 1)
       prevTimes <- prevMargs <- NULL else {
         prevOTs <- outTrans[1:(ot.N - 1)]
-        prevTimes <- data[subjs, paste(names(prevOTs), "time", sep="."),
+        prevTimes <- data[, paste("tr", prevOTs, ".time", sep=""),
                           drop=FALSE]
         prevMargs <- apply(as.data.frame(marg)[prevOTs, ], 1, extractMargs)
       }
     
-    data[subjs, paste(names(outTrans[outTrans == ot]), "time", sep=".")] <-
+    data[subjs, paste("tr", outTrans[ot.N], ".time", sep="")] <-
       sapply(subjs, function(x) eval(parse(text=copula$name))(
         par=copula$par,
         condTime=condTime[x], condMarg=condMarg,
         prevTimes=prevTimes[x,, drop=FALSE], prevMargs=prevMargs,
         marg=extractMargs(as.data.frame(marg)[ot,]),
-        eta=eta[x, c(inTrans, outTrans[1:ot.N]), drop=FALSE], 
+        eta=eta[x, c(inTrans, outTrans[1:ot.N]), drop=FALSE],
         clock=clock))
   }
   ######################################## - END of COMPETING EVENTS TIMES - ###
@@ -112,9 +98,9 @@
     
   
   ### - UPDATE DATASET - #######################################################
-  data[subjs, sapply(c("time", "status"), function(x)
-    paste(names(outTrans), x, sep="."))] <-
-      t(apply(cbind(data[subjs, paste(names(outTrans), "time", sep=".")],
+  data[subjs, sapply(c(".time", ".status"), function(x)
+    paste("tr", outTrans, x, sep=""))] <-
+      t(apply(cbind(data[subjs, paste("tr", outTrans, ".time", sep="")],
                     C.time=C.time), 1, function(x)
                       c(rep(min(x), length(x)-1), 
                         1:(length(x)-1) == which.min(x))))
@@ -124,10 +110,14 @@
   ### - NEXT EVENTS TIMES - ####################################################
   for (ot in outTrans) { # ot, the number of the transition in tmat
     # find out concerned subjects
+    subjs <- data[data[[paste("tr", ot, ".status", sep="")]] > 0, "ID"]
     # call scan.tmat on them
+    if (length(subjs))
+      data <- scan.tmat(data=data, inTrans=ot, subjs=subjs,
+                        eta=eta,   tmat=tmat,  clock=clock,
+                        marg=marg, cens=cens,  copula=copula)
   }
   ############################################# - END of NEXT EVENTS TIMES - ###
   
-# }
-  
-  
+  return(data)
+}
