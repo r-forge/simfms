@@ -3,6 +3,8 @@
 \usepackage[utf8x]{inputenc}
 \usepackage{amsmath, fullpage, amssymb, default}
 
+%\VignetteIndexEntry{Clock-reset vs clock-forward simulation}
+
 \SweaveOpts{eps=FALSE}
 
 \begin{document}
