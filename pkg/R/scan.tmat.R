@@ -92,8 +92,11 @@ scan.tmat <- function(data,
   
   
   ### - CENSORING - ############################################################
-  C.time <- extractMargs(as.data.frame(cens[names(cens)!="admin"])[atState,])(
-    runif(length(subjs)), inv=TRUE)
+  C.time <- sapply(extractMargs(
+    as.data.frame(cens[names(cens)!="admin"])[atState,])(
+      runif(length(subjs)), inv=TRUE), 
+                   function(x) min(x, cens$admin[atState]))
+    
   ##################################################### - END of CENSORING - ###
     
   

@@ -1,8 +1,8 @@
 rm(list=ls())
 setwd("/home/federico/Documents/uni/dottorato_pd_2010/Rcode/simfms/pkg/R")
 for (f in list.files()) 
-#   if (! f %in% c("simfms.R" #, "scan.tmat.R"
-#                  ))
+#    if (! f %in% c("simfms.R" #, "scan.tmat.R"
+#                   ))
     source(f)
 
 simfms(nsim  = NULL,
@@ -19,7 +19,7 @@ simfms(nsim  = NULL,
                     lambda=1, rho=1), 
        cens  = list(dist="weibull", 
                     lambda=1, rho=1, 
-                    admin= 72),
+                    admin= .5),
        copula= list(name="clayton",
                     par= 1)
        )

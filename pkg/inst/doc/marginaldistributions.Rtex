@@ -4,7 +4,7 @@
 % \usepackage[landscape]{geometry}
 \usepackage{amsmath, amssymb, fullpage}
 
-%\VignetteIndexEntry{Marginal baseline hazards table}
+%\VignetteIndexEntry{Marginal baseline hazards}
 
 \usepackage{Sweave}
 \begin{document}
