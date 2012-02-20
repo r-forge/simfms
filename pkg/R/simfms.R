@@ -75,7 +75,7 @@ simfms <- function(nsim  = NULL,
   rm("checked")
   ###################################################### - END of CONTROLS - ###
   
-  ### - INITIALIZATION - ########################################################
+  ### - INITIALIZATION - #######################################################
   initial <- initialize.fms(nsim    = nsim,
                             tmat    = tmat,
                             clock   = clock,
@@ -87,7 +87,7 @@ simfms <- function(nsim  = NULL,
   data  <- initial$data
   eta   <- initial$eta
   rm("initial")
-  ################################################# - END of INITIALIZATION - ###
+  ################################################ - END of INITIALIZATION - ###
   
   
   ### - COMPUTATION of TRANSITION TIMES - ######################################
@@ -95,24 +95,31 @@ simfms <- function(nsim  = NULL,
   data <- scan.tmat(data=data, inTrans=NULL, subjs=1:nrow(data),
                     eta=eta,   tmat=tmat,    clock=clock,
                     marg=marg, cens=cens,    copula=copula)
+  ########################################### - END of COMPUTATION of TIMES - ###
   
-  # Possible arrival states
-  events <- colnames(tmat)[colSums(tmat, na.rm=TRUE) > 0]
   
-  # Summarization into possible arrival states
-  resdata <- as.data.frame(lapply(events, function(x) {
-    res <- cbind(apply(data[, paste("tr", sort(tmat[, x]), ".time", sep=""),
-                            drop=FALSE], 
-                       1, function(x) {
-                         if (all(is.na(x))) NA else
-                         max(x, na.rm=TRUE)}),
-                 apply(data[, paste("tr", sort(tmat[, x]), ".status", sep=""),
-                            drop=FALSE], 
-                       1, max, na.rm=TRUE))
-    colnames(res) <- paste(x, c("time", "status"), sep=".")
-    return(res)
-  }))
-  ########################################## - END of COMPUTATION of TIMES - ###
+  if (fulldata)
+    resdata <- data else {
+      
+  ### - DATA in WIDE FORMAT - ##################################################
+      # Possible arrival states
+      events <- colnames(tmat)[colSums(tmat, na.rm=TRUE) > 0]
+      
+      # Summarization into possible arrival states
+      resdata <- as.data.frame(lapply(events, function(x) {
+        res <- cbind(apply(data[, paste("tr", sort(tmat[, x]), ".time", sep=""),
+                                drop=FALSE], 
+                           1, function(x) {
+                             if (all(is.na(x))) NA else
+                               max(x, na.rm=TRUE)}),
+                     apply(data[, paste("tr", sort(tmat[, x]), ".status", sep=""),
+                                drop=FALSE], 
+                           1, max, na.rm=TRUE))
+        colnames(res) <- paste(x, c("time", "status"), sep=".")
+        return(res)
+      }))
+    }
+  ################################################### - END of WIDE FORMAT - ###
   
   return(resdata)
 }

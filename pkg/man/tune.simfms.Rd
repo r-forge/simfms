@@ -1,32 +1,25 @@
-\name{simfms}
-\alias{simfms}
+\name{tune.simfms}
+\alias{tune.simfms}
 
-\title{Simulation of clustered multi-state data}
+\title{Tuning of simulation parameters for frailty multi-state data}
 \description{
-Random generation of survival data with a clustered and multi-state structure.
-
-The simulation procedure is based on a copula model for each 
-competing events block, allowing to specify the marginal distributions
-of time variables.
-
-The effect of simulated frailties and covariates can be added 
-in a proportional hazards way.
-%
-%The tuning of parameters is done by numerical minimization of a criterion function based on the ratios of target and observed values of median times and of probabilities of competing events.
+Looks for appropriate simulation parameters for multi-state data, 
+given target values of competing events probabilities 
+and of medians of uncensored times.
 }
 \usage{
-simfms(nsim = NULL, tmat = NULL, clock = "forward", 
-       frailty = list(dist = "gamma", par = 0.5), 
-       nclus = NULL, csize = NULL, 
-       covs = NULL, beta = NULL, 
-       marg = list(dist = "weibull", lambda = 1, rho = 1), 
-       cens = list(dist = "weibull", lambda = 1, rho = 1, admin = 72), 
-       copula = list(name = "clayton", par = 1),
-       fulldata = FALSE)
+tune.simfms(nsim  = NULL, tmat  = NULL, clock = "forward",
+            frailty = list(dist="gamma", par= .5),
+            nclus = NULL, csize = NULL,
+            covs = NULL, beta = NULL,
+            marg  = list(dist="weibull", lambda=1, rho=1), 
+            cens  = list(dist="weibull", lambda=1, rho=1, admin= 72),
+            copula= list(name="clayton", par= 1),
+            target = list(prob = NULL, meds = NULL))
 }
 
 \arguments{
-  \item{nsim}{The number of subjects to simulate}
+  \item{nsim}{The number of subjects to simulate per iteration}
   \item{tmat}{The transitions matrix}
   \item{clock}{The approach to be used for tractation of baseline hazards and generation of times: 
     \tabular{ll}{
@@ -61,7 +54,7 @@ simfms(nsim = NULL, tmat = NULL, clock = "forward",
         the name of the baseline hazard distributions
         (one value for all transitions)\cr
       \code{eachpar}\tab
-      each baseline parameter (either one value
+      initial value of each baseline parameter (either one value
       or as many as the number of transitions in code{tmat})
       }
     }

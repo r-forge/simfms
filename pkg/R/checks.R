@@ -20,16 +20,12 @@
 #                 nameOfCovariate = a vector of the same length as the number  #
 #                 of transitions in 'tmat'                                     #
 #   - marg      : the marginal baseline hazards. A list with components        #
-#                 dist    : the name of the baseline hazard distribution       #
-#                           (either one value or as many as the number         #
-#                            of transitions in 'tmat')                         #
+#                 dist : the name of the censoring distributions (one value)   #
 #                 eachpar : each baseline parameter                            #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
 #   - cens      : the censoring time distributions. A list with components     #
-#                 dist : the name of the censoring distributions               #
-#                           (either one value or as many as the number of      #
-#                            possible starting states in 'tmat')               #
+#                 dist : the name of the censoring distributions (one value)   #
 #                 eachpar : each censoring distribution parameter              #
 #                           (either one value or as many as the number of      #
 #                            possible starting states in 'tmat')               #
@@ -141,6 +137,10 @@ checks <- function(nsim,
   if (!is.list(cens) || is.null(cens$dist))
     stop(paste("The censoring distributions object 'cens' must be a list with",
                "at least an element 'dist'!"))
+  if (length(cens$dist) != 1)
+    stop (paste("The method is implemented only for censoring times with the",
+                "same parametric distribution!",
+                "Please, set a single value for 'cens$dist'."))
   if (!all(cens$dist %in% validbaselines))
     stop(paste("Censoring distributions not valid! \nThey must be one of '",
                paste(validbaselines, collapse="', '"),

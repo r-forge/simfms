@@ -31,10 +31,11 @@
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
 #                 par  : the copula parameter                                  #
+#   - iterative : shall the simulation continue on children transitions?       #
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 16, 2012                                   #
+#   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
 scan.tmat <- function(data,
@@ -46,7 +47,8 @@ scan.tmat <- function(data,
                       clock,
                       marg,
                       cens,
-                      copula
+                      copula,
+                      iterative = TRUE
                       ){
   ### - PREPARATION - ##########################################################
   # Present state and Conditioning transition infos
@@ -109,14 +111,16 @@ scan.tmat <- function(data,
   
   
   ### - NEXT EVENTS TIMES - ####################################################
-  for (ot in outTrans) { # ot, the number of the transition in tmat
-    # find out concerned subjects
-    subjs <- data[data[[paste("tr", ot, ".status", sep="")]] > 0, "ID"]
-    # call scan.tmat on them
-    if (length(subjs))
-      data <- scan.tmat(data=data, inTrans=ot, subjs=subjs,
-                        eta=eta,   tmat=tmat,  clock=clock,
-                        marg=marg, cens=cens,  copula=copula)
+  if (iterative) {
+    for (ot in outTrans) { # ot, the number of the transition in tmat
+      # find out concerned subjects
+      subjs <- data[data[[paste("tr", ot, ".status", sep="")]] > 0, "ID"]
+      # call scan.tmat on them
+      if (length(subjs))
+        data <- scan.tmat(data=data, inTrans=ot, subjs=subjs,
+                          eta=eta,   tmat=tmat,  clock=clock,
+                          marg=marg, cens=cens,  copula=copula)
+    }
   }
   ############################################# - END of NEXT EVENTS TIMES - ###
   

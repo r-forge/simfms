@@ -5,6 +5,42 @@ for (f in list.files())
                   ))
     source(f)
 
+
+
+nsim  = NULL
+tmat  = trans.cancer.reduced()
+clock = "forward"
+frailty = list(dist="gamma", par= .5)
+nclus = 5
+csize = 2
+covs = list(age=function(x) rnorm(x, mean=60, sd=7),
+            treat=function(x) rbinom(x, 1, .5))
+beta = list(age=rep(.02, 5), treat=rep(2, 5))
+marg  = list(dist="weibull", lambda=1, rho=1)
+cens  = list(dist="weibull", lambda=.2, rho=1, admin= .72)
+copula= list(name="clayton", par= 1)
+
+source("tune.simfms.R")
+
+pars=NULL
+inTrans=NULL
+subjs=1:nrow(data)
+
+# !!! - TARGET VALUES - !!!
+target = list(prob = rbind(
+  NED= c(NED=NA, LR=0.34, DM=0.09, De=0.07),
+  LR=c(NA, NA, NA, 0.47),
+  DM=c(NA, NA, NA, 0.95),
+  De=NA),
+              meds = rbind(
+                NED= c(NED=NA, LR=6, DM=10, De=3),
+                LR=c(NA, NA, NA, 3.25),
+                DM=c(NA, NA, NA, 0.5),
+                De=NA))
+
+criterion(data = data, atState = "NED", subjs = subjs,
+          eta = eta, tmat = tmat, clock = clock,
+          marg = marg, cens = cens, copula = copula, target =target)
 # simfms(nsim  = NULL,
 #        tmat  = trans.cancer.reduced(),
 #        clock = "forward",
@@ -101,29 +137,3 @@ for (f in list.files())
 #             )
 
 
-
-nsim  = NULL
-       tmat  = trans.cancer.reduced()
-       clock = "forward"
-       frailty = list(dist="gamma",
-                      par= .5)
-       nclus = 5
-       csize = 2
-covs = list(age=function(x) rnorm(x, mean=60, sd=7),
-            treat=function(x) rbinom(x, 1, .5))
-beta = list(age=rep(.02, 5), treat=rep(2, 5))
-marg  = list(dist="weibull", lambda=1, rho=1)
-cens  = list(dist="weibull", lambda=.2, rho=1, admin= .72)
-copula= list(name="clayton", par= 1)
-
-source("simfms.R")
-data
-
-asd = data
-table(asd$tr1.status, asd$tr4.status)
-table(asd$tr2.status, asd$tr5.status)
-table(asd$tr3.status, asd$tr4.status)
-table(asd$tr3.status, asd$tr5.status)
-
-data 
-tmat

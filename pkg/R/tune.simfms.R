@@ -52,33 +52,33 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 17, 2012                                                   #
-#   Last modification on: February, 17, 2012                                   #
+#   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
-tune.simfms <- function(nsim  = NULL,
-                        tmat  = NULL,
-                        clock = "forward",
-                        # Frailty
-                        frailty = list(dist="gamma",
-                                       par= .5),
-                        nclus = NULL, 
-                        csize = NULL,
-                        # Covariates
-                        covs = NULL,
-                        beta = NULL,
-                        # Marginals
-                        marg  = list(dist="weibull",
-                                     lambda=1, rho=1), 
-                        cens  = list(dist="weibull", 
-                                     lambda=1, rho=1, 
-                                     admin= 72),
-                        # Copula
-                        copula= list(name="clayton",
-                                     par= 1),
-                        # !!! - TARGET VALUES - !!!
-                        target = list(prob = NULL,
-                                      meds = NULL)
-                        ) {
+# tune.simfms <- function(nsim  = NULL,
+#                         tmat  = NULL,
+#                         clock = "forward",
+#                         # Frailty
+#                         frailty = list(dist="gamma",
+#                                        par= .5),
+#                         nclus = NULL, 
+#                         csize = NULL,
+#                         # Covariates
+#                         covs = NULL,
+#                         beta = NULL,
+#                         # Marginals
+#                         marg  = list(dist="weibull",
+#                                      lambda=1, rho=1), 
+#                         cens  = list(dist="weibull", 
+#                                      lambda=1, rho=1, 
+#                                      admin= 72),
+#                         # Copula
+#                         copula= list(name="clayton",
+#                                      par= 1),
+#                         # !!! - TARGET VALUES - !!!
+#                         target = list(prob = NULL,
+#                                       meds = NULL)
+#                         ) {
   ### - CONTROLS - #############################################################
   checked <- checks(nsim=nsim, tmat=tmat, clock=clock,
                     frailty=frailty, nclus=nclus,  csize=csize,
@@ -107,13 +107,13 @@ tune.simfms <- function(nsim  = NULL,
   rm("initialized")
   ################################################# - END of INITIALIZATION - ###
   
-  ### - TUNING of SIMULATION PARAMETERS - #######################################
-  # Detailed data for each transition
-  respars <- scan.tmat.tune(pars=NULL,
-                            data=data, inTrans=NULL, subjs=1:nrow(data),
-                            eta=eta,   tmat=tmat,    clock=clock,
-                            marg=marg, cens=cens,    copula=copula)
-  ########################################### - END of TUNING of PARAMETERS - ###
-  
-  return(respars)
-}
+#   ### - TUNING of SIMULATION PARAMETERS - #######################################
+#   # Detailed data for each transition
+#   respars <- scan.tmat.tune(pars=NULL,
+#                             data=data, inTrans=NULL, subjs=1:nrow(data),
+#                             eta=eta,   tmat=tmat,    clock=clock,
+#                             marg=marg, cens=cens,    copula=copula)
+#   ########################################### - END of TUNING of PARAMETERS - ###
+#   
+#   return(respars)
+# }
