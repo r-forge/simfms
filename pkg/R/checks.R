@@ -123,7 +123,7 @@ checks <- function(nsim,
     stop(paste("Baseline distributions not valid! \nThey must be one of '",
                paste(validbaselines, collapse="', '"),
                "'.", sep=""))
-  for (marEl in names(marg)) {
+  for (marEl in names(marg)[names(marg) != "dist"]) {
     if (length(marg[[marEl]]) == 1)
       marg[[marEl]] <- rep(marg[[marEl]], max(tmat, na.rm=TRUE))
     else if (length(marg[[marEl]]) != max(tmat, na.rm=TRUE))
@@ -149,7 +149,7 @@ checks <- function(nsim,
     cens$admin <- Inf
   
   censNames <- rownames(tmat)[rowSums(tmat, na.rm=TRUE) > 0]
-  for (censEl in names(cens)) {
+  for (censEl in names(cens)[! names(cens) %in% c("dist", "admin")]) {
     if (length(cens[[censEl]]) == 1) {
       cens[[censEl]] <- rep(cens[[censEl]], length(censNames))
       names(cens[[censEl]]) <- censNames

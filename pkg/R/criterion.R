@@ -9,7 +9,8 @@
 #                                                                              #
 #  Its parameters are                                                          #
 #   - data      : the dataframe with data simulated up to now                  #
-#   - inTrans   : the id number of the incoming transition                     #
+#   - atState   : the state from which new transitions are considered,         #
+#                 irrespective, for all its possible incoming ones             #
 #   - subjs     : the id numbers of the subjects concerned                     #
 #   - eta       : the linear predictors matrix, with                           #
 #                 as many rows as data                                         #
@@ -55,22 +56,24 @@ criterion <- function(data,
   ) {
   # All possible conditioning transitions
   inTrans <- tmat[which(!is.na(tmat[, atState])), atState]
-  if (!length(inTrans))
-    inTrans <- NULL
-
+  
   ### - Simulation of data with current parameter values
-  for (it in inTrans) {
-    if (is.null(it))
-      it.subjs <- subjs else
-        it.subjs <- which(data[subjs, paste("tr.", it, ".trans", sep="")] == 1)
-    
+  if (!length(inTrans)) {
+    data <- scan.tmat(data=data, inTrans=NULL, subjs=subjs,
+                      eta=eta,   tmat=tmat,  clock=clock,
+                      marg=marg, cens=cens,  copula=copula,
+                      iterative=FALSE)    
+  } else for (it in inTrans) {
+    it.subjs <- which(data[subjs, paste("tr.", it, ".trans", sep="")] == 1)
     data <- scan.tmat(data=data, inTrans=it, subjs=subjs,
                       eta=eta,   tmat=tmat,  clock=clock,
-                      marg=marg, cens=cens,  copula=copula)
+                      marg=marg, cens=cens,  copula=copula,
+                      iterative=FALSE)
   }
   
-  
+  # All possible outgoing transitions
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
+  
   ### - Computation of criterion 
   # sum{ log( prob / \hat prob )^2}
   crit <- sum(log(

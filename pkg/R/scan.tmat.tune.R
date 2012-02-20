@@ -7,9 +7,13 @@
 #     and of medians of uncensored times                                       #
 #                                                                              #
 #  Its parameters are                                                          #
-#   - pars      : the list with parameters values chosen till now              #
+#   - target    : target values for probabilities of competing events and for  #
+#                 medians of uncensored times of each transition.              #
+#                 A list with elements 'prob' and 'meds', both vector of the   #
+#                 same length as the number of transitions in 'tmat'           #
 #   - data      : the dataframe with data simulated up to now                  #
-#   - inTrans   : the id number of the incoming transition                     #
+#   - atState   : the state from which new transitions are considered,         #
+#                 irrespective, for all its possible incoming ones             #
 #   - subjs     : the id numbers of the subjects concerned                     #
 #   - eta       : the linear predictors matrix, with                           #
 #                 as many rows as data                                         #
@@ -19,9 +23,9 @@
 #   - marg      : the marginal baseline hazards. A list with components        #
 #                 dist    : the name of the baseline hazard distribution       #
 #                            (one value)                                       #
-#                 eachpar : initial values of each baseline parameter          #
-#                           (either one value or as many as the number         #
-#                            of transitions in 'tmat')                         #
+#                 eachpar : initial or present values of each                  #
+#                           baseline parameter (either one value or as many    #
+#                           as the number of transitions in 'tmat')            #
 #   - cens      : the censoring time distributions. A list with components     #
 #                 dist : the name of the censoring distributions (one value)   #
 #                 eachpar : each censoring distribution parameter              #
@@ -31,22 +35,17 @@
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
 #                 par  : the copula parameter                                  #
-#   - target    : target values for probabilities of competing events and for  #
-#                 medians of uncensored times of each transition.              #
-#                 A list with elements 'prob' and 'meds', both vector of the   #
-#                 same length as the number of transitions in 'tmat'           #
 #                                                                              #
 #                                                                              #
 #   Date: February, 20, 2012                                                   #
 #   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
-scan.tmat.tune <- function(pars,
+scan.tmat.tune <- function(target,
                            data,
-                           inTrans,
+                           atState,
                            subjs,
                            eta,
-                           # Other parameters from tune.simfms()
                            tmat,
                            clock,
                            marg,
@@ -54,21 +53,55 @@ scan.tmat.tune <- function(pars,
                            copula
                            ){
   ### - PREPARATION - ##########################################################
-  # Present state and Conditioning transition infos
-  if (is.null(inTrans)){ # from the starting state
+  if (is.null(atState))
     atState <- colnames(tmat)[which(colSums(tmat, na.rm=TRUE) == 0)]
-    condTime <- condMarg <- NULL
-  } else { # from all the other states
-    atState <- colnames(tmat)[which(tmat == inTrans, arr.ind=TRUE)[2]]
-    condTime <- data[, paste("tr", inTrans, ".time", sep="")]
-    condMarg <- extractMargs(as.data.frame(marg)[inTrans,])
-  }
+  # All possible conditioning transitions
+  inTrans <- tmat[which(!is.na(tmat[, atState])), atState]
+  if (!length(inTrans))
+    inTrans <- NULL
+  
+  # All possible outgoing transitions
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
   # if ending state, then return results
   if (length(outTrans) == 0)
-    return(pars=pars)
+    return(list(marg=marg, cens=cens))
+
+  # Reparameterization on all R
+  optimPars <- list(
+    marg = t(apply(as.data.frame(marg)[outTrans, 
+                                       !names(marg) == "dist", 
+                                       drop=FALSE], 1, 
+                   function(x) attr(eval(parse(text=marg$dist)), 
+                                    "optimPars")(x))),
+    cens = t(apply(as.data.frame(cens)[atState, 
+                                       !names(marg) %in% c("dist", "admin"), 
+                                       drop=FALSE], 1, 
+                   function(x) attr(eval(parse(text=cens$dist)), 
+                                    "optimPars")(x))))    
   ################################################### - END of PREPARATION - ###
 
+  parnames <- unique(c(colnames(optimPars$marg), colnames(optimPars$cens)))
+  
+  for (par in parnames) {
+    inipar <- c(optimPars$marg[,par], optimPars$cens[,par])
+    
+    tomin <- function(par.val=inipar, par=par, outTrans=outTrans,
+                      data=data, atState=atState, subjs=subjs, eta=eta,
+                      tmat=tmat, clock=clock, marg=marg, cens=cens,
+                      copula=copula, target=target) {
+      marg[[par]][outTrans] <-
+        attr(eval(parse(text=marg$dist)), "optimPars")(
+          par.val[1:length(outTrans)], inv=TRUE)
+      cens[[par]][atState] <-
+        attr(eval(parse(text=cens$dist)), "optimPars")(
+          par.val[1 + length(outTrans)], inv=TRUE)
+      criterion(data=data, atState=atState, subjs=subjs, eta=eta,
+                tmat=tmat, clock=clock, marg=marg, cens=cens,
+                copula=copula, target=target)
+    }
+    
+    
+  }
   
   ### - COMPETING RISKS PARAMETERS TUNING - #####################################
   
@@ -98,5 +131,5 @@ scan.tmat.tune <- function(pars,
 #   }
   ################################################ - END of NEXT CRs BLOCKS - ###
   
-  return(pars=pars)
+  return(list(marg=marg, cens=cens))
 }

@@ -95,7 +95,7 @@ scan.tmat <- function(data,
   C.time <- sapply(extractMargs(
     as.data.frame(cens[names(cens)!="admin"])[atState,])(
       runif(length(subjs)), inv=TRUE), 
-                   function(x) min(x, cens$admin[atState]))
+                   function(x) min(x, cens$admin))
     
   ##################################################### - END of CENSORING - ###
     

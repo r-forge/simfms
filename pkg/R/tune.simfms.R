@@ -80,10 +80,12 @@
 #                                       meds = NULL)
 #                         ) {
   ### - CONTROLS - #############################################################
-  checked <- checks(nsim=nsim, tmat=tmat, clock=clock,
-                    frailty=frailty, nclus=nclus,  csize=csize,
-                    covs=covs, beta=beta, marg=marg, 
-                    cens=cens, copula=copula)
+  checked <- checks(nsim=nsim,   tmat=tmat,   
+                    clock=clock, frailty=frailty,
+                    nclus=nclus, csize=csize,
+                    covs=covs,   beta=beta,
+                    marg=marg,   cens=cens,
+                    copula=copula)
   nsim  <- checked$nsim
   nclus <- checked$nclus
   csize <- checked$csize
@@ -94,14 +96,10 @@
   ###################################################### - END of CONTROLS - ###
   
   ### - INITIALIZATION - ########################################################
-  initialized <- initialize.fms(nsim    = nsim,
-                                tmat    = tmat,
-                                clock   = clock,
-                                frailty = frailty,
-                                nclus   = nclus,
-                                csize   = csize,
-                                covs    = covs,
-                                beta    = beta)
+  initialized <- initialize.fms(nsim  = nsim,  tmat    = tmat, 
+                                clock = clock, frailty = frailty, 
+                                nclus = nclus, csize   = csize,
+                                covs  = covs,  beta    = beta)
   data  <- initialized$data
   eta   <- initialized$eta
   rm("initialized")
@@ -110,7 +108,7 @@
 #   ### - TUNING of SIMULATION PARAMETERS - #######################################
 #   # Detailed data for each transition
 #   respars <- scan.tmat.tune(pars=NULL,
-#                             data=data, inTrans=NULL, subjs=1:nrow(data),
+#                             data=data, atState=NULL, subjs=1:nrow(data),
 #                             eta=eta,   tmat=tmat,    clock=clock,
 #                             marg=marg, cens=cens,    copula=copula)
 #   ########################################### - END of TUNING of PARAMETERS - ###

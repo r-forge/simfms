@@ -20,10 +20,11 @@ marg  = list(dist="weibull", lambda=1, rho=1)
 cens  = list(dist="weibull", lambda=.2, rho=1, admin= .72)
 copula= list(name="clayton", par= 1)
 
+
+
 source("tune.simfms.R")
 
-pars=NULL
-inTrans=NULL
+atState=NULL
 subjs=1:nrow(data)
 
 # !!! - TARGET VALUES - !!!
@@ -38,9 +39,14 @@ target = list(prob = rbind(
                 DM=c(NA, NA, NA, 0.5),
                 De=NA))
 
-criterion(data = data, atState = "NED", subjs = subjs,
-          eta = eta, tmat = tmat, clock = clock,
-          marg = marg, cens = cens, copula = copula, target =target)
+criterion(data=data, atState="NED", subjs=subjs,
+          eta=eta, tmat=tmat, clock=clock,
+          marg=marg, cens=cens, copula=copula, target=target)
+  
+scan.tmat.tune(data = data, atState = atState, subjs = subjs,
+               eta = eta, tmat = tmat, clock = clock,
+               marg = marg, cens = cens, copula = copula, target =target)
+
 # simfms(nsim  = NULL,
 #        tmat  = trans.cancer.reduced(),
 #        clock = "forward",
