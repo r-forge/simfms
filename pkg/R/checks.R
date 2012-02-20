@@ -39,7 +39,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 15, 2012                                   #
+#   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
 checks <- function(nsim,
@@ -56,8 +56,7 @@ checks <- function(nsim,
                    marg,
                    cens,
                    # Copula
-                   copula= list(name="clayton",
-                                par= 1)
+                   copula
                    ) {
   ### Transition matrix ###
   if (is.null(tmat))
@@ -119,8 +118,12 @@ checks <- function(nsim,
   if (!is.list(marg) || is.null(marg$dist))
     stop(paste("The marginal baselines object 'marg' must be a list with",
                "at least an element 'dist'!"))
+  if (length(marg$dist) != 1)
+    stop (paste("The method is implemented only for marginal baselines with the",
+                "same distribution!",
+                "Please, set a single value for 'marg$dist'."))
   validbaselines <- c("gompertz", "loglogistic", "lognormal", "weibull")
-  if (!all(marg$dist %in% validbaselines))
+  if (!(marg$dist %in% validbaselines))
     stop(paste("Baseline distributions not valid! \nThey must be one of '",
                paste(validbaselines, collapse="', '"),
                "'.", sep=""))

@@ -18,18 +18,16 @@
 #   - clock     : either 'forward' or 'reset'                                  #
 #   - marg      : the marginal baseline hazards. A list with components        #
 #                 dist    : the name of the baseline hazard distribution       #
-#                           (either one value or as many as the number         #
-#                            of transitions in 'tmat')                         #
-#                 eachpar : each baseline parameter                            #
+#                            (one value)                                       #
+#                 eachpar : initial values of each baseline parameter          #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
 #   - cens      : the censoring time distributions. A list with components     #
-#                 dist : the name of the censoring distributions               #
-#                           (either one value or as many as the number of      #
-#                            possible starting states in 'tmat')               #
+#                 dist : the name of the censoring distributions (one value)   #
 #                 eachpar : each censoring distribution parameter              #
 #                           (either one value or as many as the number of      #
 #                            possible starting states in 'tmat')               #
+#                 admin: the time of administrative censoring                  #
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
 #                 par  : the copula parameter                                  #

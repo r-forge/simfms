@@ -23,21 +23,16 @@
 #                 nameOfCovariate = a vector of the same length as the number  #
 #                 of transitions in 'tmat'                                     #
 #   - marg      : the marginal baseline hazards. A list with components        #
-#                 dist    : the name of the baseline hazard distributions      #
-#                           (either one value or as many as the number         #
-#                            of transitions in 'tmat')                         #
-#                 eachpar : initial value of each baseline parameter           #
+#                 dist    : the name of the baseline hazard distribution       #
+#                            (one value)                                       #
+#                 eachpar : initial values of each baseline parameter          #
 #                           (either one value or as many as the number         #
 #                            of transitions in 'tmat')                         #
 #   - cens      : the censoring time distributions. A list with components     #
-#                 dist : the name of the censoring distributions               #
+#                 dist : the name of the censoring distributions (one value)   #
+#                 eachpar : each censoring distribution parameter              #
 #                           (either one value or as many as the number of      #
-#                            possible starting states in 'tmat',               #
-#                            possibly with states' names)                      #
-#                 eachpar : initial value of each censoring distribution       #
-#                           parameter (either one value or as many as the      #
-#                            number of  possible starting states in 'tmat',    #
-#                            possibly with states' names)                      #
+#                            possible starting states in 'tmat')               #
 #                 admin: the time of administrative censoring                  #
 #   - copula    : the copula model. A list with components                     #
 #                 name : the name of the copula                                #
@@ -85,19 +80,40 @@ tune.simfms <- function(nsim  = NULL,
                                       meds = NULL)
                         ) {
   ### - CONTROLS - #############################################################
-  checks <- checks(nsim=nsim, tmat=tmat, clock=clock,
-                   frailty=frailty, nclus=nclus,  csize=csize,
-                   covs=covs, beta=beta, marg=marg, 
-                   cens=cens, copula=copula)
-  nsim  <- checks$nsim
-  nclus <- checks$nclus
-  csize <- checks$csize
-  clock <- checks$clock
-  marg  <- checks$marg
-  cens  <- checks$cens
-  rm("checks")
+  checked <- checks(nsim=nsim, tmat=tmat, clock=clock,
+                    frailty=frailty, nclus=nclus,  csize=csize,
+                    covs=covs, beta=beta, marg=marg, 
+                    cens=cens, copula=copula)
+  nsim  <- checked$nsim
+  nclus <- checked$nclus
+  csize <- checked$csize
+  clock <- checked$clock
+  marg  <- checked$marg
+  cens  <- checked$cens
+  rm("checked")
   ###################################################### - END of CONTROLS - ###
   
+  ### - INITIALIZATION - ########################################################
+  initialized <- initialize.fms(nsim    = nsim,
+                                tmat    = tmat,
+                                clock   = clock,
+                                frailty = frailty,
+                                nclus   = nclus,
+                                csize   = csize,
+                                covs    = covs,
+                                beta    = beta)
+  data  <- initialized$data
+  eta   <- initialized$eta
+  rm("initialized")
+  ################################################# - END of INITIALIZATION - ###
   
+  ### - TUNING of SIMULATION PARAMETERS - #######################################
+  # Detailed data for each transition
+  respars <- scan.tmat.tune(pars=NULL,
+                            data=data, inTrans=NULL, subjs=1:nrow(data),
+                            eta=eta,   tmat=tmat,    clock=clock,
+                            marg=marg, cens=cens,    copula=copula)
+  ########################################### - END of TUNING of PARAMETERS - ###
   
+  return(respars)
 }
