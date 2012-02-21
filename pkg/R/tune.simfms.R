@@ -105,13 +105,12 @@
   rm("initialized")
   ################################################# - END of INITIALIZATION - ###
   
-#   ### - TUNING of SIMULATION PARAMETERS - #######################################
-#   # Detailed data for each transition
-#   respars <- scan.tmat.tune(pars=NULL,
-#                             data=data, atState=NULL, subjs=1:nrow(data),
-#                             eta=eta,   tmat=tmat,    clock=clock,
-#                             marg=marg, cens=cens,    copula=copula)
-#   ########################################### - END of TUNING of PARAMETERS - ###
-#   
+  ### - TUNING of SIMULATION PARAMETERS - #######################################
+  # Detailed data for each transition
+  apply(tmat, 1, function(x) {
+    thisState.tune()
+  })
+  ########################################### - END of TUNING of PARAMETERS - ###
+  
 #   return(respars)
 # }

@@ -1,8 +1,9 @@
 ################################################################################
-#  Tuning of simulation parameters for a comepeting risks block                #
+#  Tuning of simulation parameters for a present state                         #
 ################################################################################
 #                                                                              #
-#  Tunes iteratively the simulation parameters of a competing risks blcock,    #
+#  Tunes the simulation parameters for a ''present state'', that is for its    #
+#     CRs block and for all possible incoming transitions,                     #
 #     according to given target values for probabilities of competing events   #
 #     and of medians of uncensored times                                       #
 #                                                                              #
@@ -41,7 +42,7 @@
 #   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
-scan.tmat.tune <- function(target,
+thisState.tune <- function(target,
                            data,
                            atState,
                            subjs,
@@ -117,19 +118,6 @@ scan.tmat.tune <- function(target,
 #                         1:(length(x)-1) == which.min(x))))
   ############################################## - END of UPDATE PARAMETERS - ###
   
-  
-  ### - NEXT CRs BLOCKS - #######################################################
-#   for (ot in outTrans) { # ot, the number of the transition in tmat
-#     # find out concerned subjects
-#     subjs <- data[data[[paste("tr", ot, ".status", sep="")]] > 0, "ID"]
-#     # call scan.tmat on them
-#     if (length(subjs))
-#       data <- scan.tmat(pars=pars, 
-#                         data=data, inTrans=ot, subjs=subjs,
-#                         eta=eta,   tmat=tmat,  clock=clock,
-#                         marg=marg, cens=cens,  copula=copula)
-#   }
-  ################################################ - END of NEXT CRs BLOCKS - ###
   
   return(list(marg=marg, cens=cens))
 }
