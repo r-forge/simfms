@@ -43,7 +43,7 @@ criterion(data=data, atState="NED", subjs=subjs,
           eta=eta, tmat=tmat, clock=clock,
           marg=marg, cens=cens, copula=copula, target=target)
   
-scan.tmat.tune(data = data, atState = atState, subjs = subjs,
+thisState.tune(data = data, atState = atState, subjs = subjs,
                eta = eta, tmat = tmat, clock = clock,
                marg = marg, cens = cens, copula = copula, target =target)
 

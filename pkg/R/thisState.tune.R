@@ -39,23 +39,24 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 20, 2012                                                   #
-#   Last modification on: February, 20, 2012                                   #
+#   Last modification on: February, 21, 2012                                   #
 ################################################################################
 
-thisState.tune <- function(target,
-                           data,
-                           atState,
-                           subjs,
-                           eta,
-                           tmat,
-                           clock,
-                           marg,
-                           cens,
-                           copula
-                           ){
+# thisState.tune <- function(target,
+#                            data,
+#                            atState,
+#                            subjs,
+#                            eta,
+#                            tmat,
+#                            clock,
+#                            marg,
+#                            cens,
+#                            copula
+#                            ){
   ### - PREPARATION - ##########################################################
   if (is.null(atState))
     atState <- colnames(tmat)[which(colSums(tmat, na.rm=TRUE) == 0)]
+  
   # All possible conditioning transitions
   inTrans <- tmat[which(!is.na(tmat[, atState])), atState]
   if (!length(inTrans))
@@ -84,22 +85,31 @@ thisState.tune <- function(target,
   parnames <- unique(c(colnames(optimPars$marg), colnames(optimPars$cens)))
   
   for (par in parnames) {
-    inipar <- c(optimPars$marg[,par], optimPars$cens[,par])
+    inipar <- c(optimPars$marg[, par], optimPars$cens[, par])
     
-    tomin <- function(par.val=inipar, par=par, outTrans=outTrans,
-                      data=data, atState=atState, subjs=subjs, eta=eta,
-                      tmat=tmat, clock=clock, marg=marg, cens=cens,
-                      copula=copula, target=target) {
-      marg[[par]][outTrans] <-
-        attr(eval(parse(text=marg$dist)), "optimPars")(
-          par.val[1:length(outTrans)], inv=TRUE)
-      cens[[par]][atState] <-
-        attr(eval(parse(text=cens$dist)), "optimPars")(
-          par.val[1 + length(outTrans)], inv=TRUE)
+    tomin <- function(x, par.name, outTrans, data, atState, subjs, eta,
+                      tmat, clock, marg, cens, copula, target) {
+      margdist <- attr(eval(parse(text=marg$dist)), "optimPars")
+      marg[[par.name]][outTrans] <-
+        margdist(x[1:length(outTrans)], inv=TRUE)
+      
+      censdist <- attr(eval(parse(text=cens$dist)), "optimPars")
+      cens[[par.name]][atState] <-
+        censdist(x[length(x)], inv=TRUE)
+      
       criterion(data=data, atState=atState, subjs=subjs, eta=eta,
                 tmat=tmat, clock=clock, marg=marg, cens=cens,
                 copula=copula, target=target)
     }
+    
+    par.res <- optim(inipar, 
+                     fn=tomin, 
+                     par.name=par, outTrans=outTrans,
+                     data=data, atState=atState, subjs=subjs, eta=eta,
+                     tmat=tmat, clock=clock, marg=marg, cens=cens,
+                     copula=copula, target=target,
+                     method="SANN")
+    par.res$par
     
     
   }
@@ -119,5 +129,5 @@ thisState.tune <- function(target,
   ############################################## - END of UPDATE PARAMETERS - ###
   
   
-  return(list(marg=marg, cens=cens))
-}
+#   return(list(marg=marg, cens=cens))
+# }
