@@ -55,7 +55,7 @@
 #   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
-# tune.simfms <- function(nsim  = NULL,
+# tune.simfms <- function(nsim  = 5000,
 #                         tmat  = NULL,
 #                         clock = "forward",
 #                         # Frailty
@@ -105,12 +105,12 @@
   rm("initialized")
   ################################################# - END of INITIALIZATION - ###
   
-  ### - TUNING of SIMULATION PARAMETERS - #######################################
-  # Detailed data for each transition
-  apply(tmat, 1, function(x) {
-    thisState.tune()
-  })
-  ########################################### - END of TUNING of PARAMETERS - ###
-  
+#   ### - TUNING of SIMULATION PARAMETERS - #######################################
+#   # Detailed data for each transition
+#   apply(tmat, 1, function(x) {
+#     thisState.tune()
+#   })
+#   ########################################### - END of TUNING of PARAMETERS - ###
+#   
 #   return(respars)
 # }

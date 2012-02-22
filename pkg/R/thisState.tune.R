@@ -109,9 +109,11 @@
                      tmat=tmat, clock=clock, marg=marg, cens=cens,
                      copula=copula, target=target,
                      method="SANN")
-    par.res$par
     
-    
+    marg[[par]][atState,] <- attr(eval(parse(text=cens$dist)), 
+                                 "optimPars")(par.res$par[length(par.res$par)])
+    cens[[par]][atState] <- attr(eval(parse(text=cens$dist)), 
+                                 "optimPars")(par.res$par[length(par.res$par)])
   }
   
   ### - COMPETING RISKS PARAMETERS TUNING - #####################################

@@ -20,7 +20,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 14, 2012                                                   #
-#   Last modification on: February, 14, 2012                                   #
+#   Last modification on: February, 22, 2012                                   #
 ################################################################################
 
 
@@ -71,10 +71,12 @@ loglogistic <- function(pars=list(alpha=1, kappa=1)) {
 }
 
 attr(loglogistic, "optimPars") <- function(pars, inv=FALSE) {
-  if(inv) {
-    pars$kappa <- exp(pars$kappa)
-  } else
-    pars$kappa <- log(pars$kappa)
+  if (!is.null(pars$kappa)) {
+    if(inv) {
+      pars$kappa <- exp(pars$kappa)
+    } else
+      pars$kappa <- log(pars$kappa)
+  }
   return(pars)
 }
 ###################################################### - END of LOGLOGISTIC - ##
@@ -100,10 +102,12 @@ lognormal <- function(pars=list(mu=1, sigma=1)) {
 }
 
 attr(lognormal, "optimPars") <- function(pars, inv=FALSE) {
-  if(inv) {
-    pars$sigma <- exp(pars$sigma)
-  } else
-    pars$sigma <- log(pars$sigma)
+  if (!is.null(pars$sigma)) {
+    if(inv) {
+      pars$sigma <- exp(pars$sigma)
+    } else
+      pars$sigma <- log(pars$sigma)
+  }
   return(pars)
 }
 ######################################################## - END of LOGNORMAL - ##

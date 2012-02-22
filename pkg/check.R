@@ -1,18 +1,18 @@
 rm(list=ls())
 setwd("/home/federico/Documents/uni/dottorato_pd_2010/Rcode/simfms/pkg/R")
 for (f in list.files()) 
-   if (! f %in% c("tune.simfms.R" , "scan.tmat.tune.R"
+   if (! f %in% c("tune.simfms.R" , "thisState.tune.R"
                   ))
     source(f)
 
 
 
-nsim  = NULL
+nsim  = 5000
 tmat  = trans.cancer.reduced()
 clock = "forward"
 frailty = list(dist="gamma", par= .5)
-nclus = 5
-csize = 2
+nclus = 50
+csize = NULL
 covs = list(age=function(x) rnorm(x, mean=60, sd=7),
             treat=function(x) rbinom(x, 1, .5))
 beta = list(age=rep(.02, 5), treat=rep(2, 5))
@@ -25,7 +25,7 @@ copula= list(name="clayton", par= 1)
 source("tune.simfms.R")
 
 atState=NULL
-subjs=1:nrow(data)
+subjs=1:nsim
 
 # !!! - TARGET VALUES - !!!
 target = list(prob = rbind(
@@ -39,13 +39,17 @@ target = list(prob = rbind(
                 DM=c(NA, NA, NA, 0.5),
                 De=NA))
 
-criterion(data=data, atState="NED", subjs=subjs,
-          eta=eta, tmat=tmat, clock=clock,
-          marg=marg, cens=cens, copula=copula, target=target)
-  
-thisState.tune(data = data, atState = atState, subjs = subjs,
-               eta = eta, tmat = tmat, clock = clock,
-               marg = marg, cens = cens, copula = copula, target =target)
+# criterion(data=data, atState="NED", subjs=subjs,
+#           eta=eta, tmat=tmat, clock=clock,
+#           marg=marg, cens=cens, copula=copula, target=target)
+
+
+
+source("thisState.tune.simfms.R")
+
+# thisState.tune(data = data, atState = atState, subjs = subjs,
+#                eta = eta, tmat = tmat, clock = clock,
+#                marg = marg, cens = cens, copula = copula, target =target)
 
 # simfms(nsim  = NULL,
 #        tmat  = trans.cancer.reduced(),
