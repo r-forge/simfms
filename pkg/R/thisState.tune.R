@@ -42,17 +42,17 @@
 #   Last modification on: February, 21, 2012                                   #
 ################################################################################
 
-# thisState.tune <- function(target,
-#                            data,
-#                            atState,
-#                            subjs,
-#                            eta,
-#                            tmat,
-#                            clock,
-#                            marg,
-#                            cens,
-#                            copula
-#                            ){
+thisState.tune <- function(target,
+                           data,
+                           atState,
+                           subjs,
+                           eta,
+                           tmat,
+                           clock,
+                           marg,
+                           cens,
+                           copula
+                           ){
   ### - PREPARATION - ##########################################################
   if (is.null(atState))
     atState <- colnames(tmat)[which(colSums(tmat, na.rm=TRUE) == 0)]
@@ -132,4 +132,4 @@
   
   
 #   return(list(marg=marg, cens=cens))
-# }
+}

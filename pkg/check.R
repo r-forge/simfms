@@ -46,7 +46,7 @@ criterion(data=data, atState="NED", subjs=subjs,
 
 
 
-# source("thisState.tune.simfms.R")
+source("thisState.tune.R")
 
 # thisState.tune(data = data, atState = atState, subjs = subjs,
 #                eta = eta, tmat = tmat, clock = clock,
