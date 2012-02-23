@@ -7,11 +7,11 @@ for (f in list.files())
 
 
 
-nsim  = 5000
+nsim  = 50#00
 tmat  = trans.cancer.reduced()
 clock = "forward"
 frailty = list(dist="gamma", par= .5)
-nclus = 50
+nclus = 5#0
 csize = NULL
 covs = list(age=function(x) rnorm(x, mean=60, sd=7),
             treat=function(x) rbinom(x, 1, .5))
@@ -39,13 +39,14 @@ target = list(prob = rbind(
                 DM=c(NA, NA, NA, 0.5),
                 De=NA))
 
-# criterion(data=data, atState="NED", subjs=subjs,
-#           eta=eta, tmat=tmat, clock=clock,
-#           marg=marg, cens=cens, copula=copula, target=target)
+# debugonce(scan.tmat)
+criterion(data=data, atState="NED", subjs=subjs,
+          eta=eta, tmat=tmat, clock=clock,
+          marg=marg, cens=cens, copula=copula, target=target)
 
 
 
-source("thisState.tune.simfms.R")
+# source("thisState.tune.simfms.R")
 
 # thisState.tune(data = data, atState = atState, subjs = subjs,
 #                eta = eta, tmat = tmat, clock = clock,

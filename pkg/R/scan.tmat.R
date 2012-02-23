@@ -49,18 +49,19 @@ scan.tmat <- function(data,
                       cens,
                       copula,
                       iterative = TRUE
-                      ){
+                      ) {
   ### - PREPARATION - ##########################################################
   # Present state and Conditioning transition infos
   if (is.null(inTrans)){ # from the starting state
     atState <- colnames(tmat)[which(colSums(tmat, na.rm=TRUE) == 0)]
-    condTime <- condMarg <- NULL
+#     condTime <- condMarg <- NULL
   } else { # from all the other states
     atState <- colnames(tmat)[which(tmat == inTrans, arr.ind=TRUE)[2]]
-    condTime <- data[, paste("tr", inTrans, ".time", sep="")]
-    condMarg <- extractMargs(as.data.frame(marg)[inTrans,])
+#     condTime <- data[, paste("tr", inTrans, ".time", sep="")]
+#     condMarg <- extractMargs(as.data.frame(marg)[inTrans,])
   }
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
+  
   # if ending state, then return results
   if (length(outTrans) == 0)
     return(data)
@@ -80,13 +81,17 @@ scan.tmat <- function(data,
       }
     
     data[subjs, paste("tr", outTrans[ot.N], ".time", sep="")] <-
-      sapply(subjs, function(x) eval(parse(text=copula$name))(
-        par=copula$par,
-        condTime=condTime[x], condMarg=condMarg,
-        prevTimes=prevTimes[x,, drop=FALSE], prevMargs=prevMargs,
-        marg=extractMargs(as.data.frame(marg)[ot,]),
-        eta=eta[x, c(inTrans, outTrans[1:ot.N]), drop=FALSE],
-        clock=clock))
+#       sapply(subjs, function(x) eval(parse(text=copula$name))(
+#         par=copula$par,
+#         condTime=condTime[x], condMarg=condMarg,
+#         prevTimes=prevTimes[x,, drop=FALSE], prevMargs=prevMargs,
+#         marg=extractMargs(as.data.frame(marg)[ot,]),
+#         eta=eta[x, c(inTrans, outTrans[1:ot.N]), drop=FALSE],
+#         clock=clock))
+      Vectorize(eval(parse(text=copula$name)), c("subj"))(
+        par=copula$par, subj=subjs, atState=atState, inTrans=inTrans,
+        outTrans=outTrans, trans=ot, data=data, eta=eta, tmat=tmat,
+        clock=clock, marg=marg, cens=cens)
   }
   ######################################## - END of COMPETING EVENTS TIMES - ###
   
