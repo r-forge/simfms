@@ -17,7 +17,7 @@ covs = list(age=function(x) rnorm(x, mean=60, sd=7),
             treat=function(x) rbinom(x, 1, .5))
 beta = list(age=rep(.02, 5), treat=rep(2, 5))
 marg  = list(dist="weibull", lambda=1, rho=1)
-cens  = list(dist="weibull", lambda=.2, rho=1, admin= .72)
+cens  = list(dist="weibull", lambda=.8, rho=1, admin= .72)
 copula= list(name="clayton", par= 1)
 
 

@@ -73,8 +73,11 @@ simfms <- function(nsim  = NULL,
   csize <- checked$csize
   frailty$type <- checked$Ftype
   clock <- checked$clock
-  marg  <- checked$marg
-  cens  <- checked$cens
+  marg  <- apply(as.data.frame(checked$marg), 1, extractMargs)
+  names(marg) <- 1:length(marg)
+  cens  <- list(f = apply(subset(as.data.frame(checked$cens), 
+                                        select=-admin), 1, extractMargs),
+                admin = checked$cens$admin)
   rm("checked")
   ###################################################### - END of CONTROLS - ###
   
@@ -95,7 +98,7 @@ simfms <- function(nsim  = NULL,
   
   ### - COMPUTATION of TRANSITION TIMES - ######################################
   # Detailed data for each transition
-  data <- scan.tmat(data=data, inTrans=NULL, subjs=1:nrow(data),
+  data <- scan.tmat(data=data, inTrans=NULL, #subjs=1:nrow(data),
                     eta=eta,   tmat=tmat,    clock=clock,
                     marg=marg, cens=cens,    copula=copula)
   ########################################### - END of COMPUTATION of TIMES - ###

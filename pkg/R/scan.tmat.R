@@ -35,12 +35,12 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 20, 2012                                   #
+#   Last modification on: March, 29, 2012                                      #
 ################################################################################
 
 scan.tmat <- function(data,
                       inTrans,
-                      subjs,
+#                       subjs,
                       eta,
                       # Other parameters from simfms()
                       tmat,
@@ -54,11 +54,11 @@ scan.tmat <- function(data,
   # Present state and Conditioning transition infos
   if (is.null(inTrans)){ # from the starting state
     atState <- colnames(tmat)[which(colSums(tmat, na.rm=TRUE) == 0)]
-#     condTime <- condMarg <- NULL
+    condTime <- condMarg <- NULL
   } else { # from all the other states
     atState <- colnames(tmat)[which(tmat == inTrans, arr.ind=TRUE)[2]]
-#     condTime <- data[, paste("tr", inTrans, ".time", sep="")]
-#     condMarg <- extractMargs(as.data.frame(marg)[inTrans,])
+    condTime <- data[, paste("tr", inTrans, ".time", sep="")]
+    condMarg <- marg[[paste(inTrans)]]
   }
   outTrans <- tmat[atState, which(!is.na(tmat[atState, ]))]
   
@@ -72,43 +72,41 @@ scan.tmat <- function(data,
   for (ot in outTrans) { # ot, the number of the transition in tmat!!!!!!!!!!!!!
     ot.N <- which(outTrans == ot) # ot.N its rank in the CRs block!!!!!!!!!!!!!!
     # Previous transition(s) infos
-    if (ot.N == 1)
-      prevTimes <- prevMargs <- NULL else {
-        prevOTs <- outTrans[1:(ot.N - 1)]
-        prevTimes <- data[, paste("tr", prevOTs, ".time", sep=""),
-                          drop=FALSE]
-        prevMargs <- apply(as.data.frame(marg)[prevOTs, ], 1, extractMargs)
-      }
+    if (ot.N == 1) {
+      prevOTs <- prevTimes <- prevMargs <- NULL
+    } else {
+      prevOTs <- outTrans[1:(ot.N - 1)]
+      prevTimes <- data[, paste("tr", prevOTs, ".time", sep=""),
+                        drop=FALSE]
+      prevMargs <- marg[paste(prevOTs)]
+    }
     
-    data[subjs, paste("tr", outTrans[ot.N], ".time", sep="")] <-
-#       sapply(subjs, function(x) eval(parse(text=copula$name))(
-#         par=copula$par,
-#         condTime=condTime[x], condMarg=condMarg,
-#         prevTimes=prevTimes[x,, drop=FALSE], prevMargs=prevMargs,
-#         marg=extractMargs(as.data.frame(marg)[ot,]),
-#         eta=eta[x, c(inTrans, outTrans[1:ot.N]), drop=FALSE],
-#         clock=clock))
-      Vectorize(eval(parse(text=copula$name)), c("subj"))(
-        par=copula$par, subj=subjs, atState=atState, inTrans=inTrans,
-        outTrans=outTrans, trans=ot, data=data, eta=eta, tmat=tmat,
-        clock=clock, marg=marg, cens=cens)
+    for (subj in 1:nrow(data)) {
+      data[subj, paste("tr", outTrans[ot.N], ".time", sep="")] <-
+        eval(parse(text=copula$name))(
+          par=copula$par,
+          condTime=condTime[subj],
+          condMarg=condMarg,
+          trans=ot, marg=marg[[paste(ot)]],
+          prevTimes=prevTimes[subj, ], prevMargs=prevMargs,
+          eta=eta[subj, c(inTrans, prevOTs, ot)], tmat=tmat,
+          clock=clock)
+    }
   }
   ######################################## - END of COMPETING EVENTS TIMES - ###
   
   
   ### - CENSORING - ############################################################
-  C.time <- sapply(extractMargs(
-    as.data.frame(cens[names(cens)!="admin"])[atState,])(
-      runif(length(subjs)), inv=TRUE), 
+  C.time <- sapply(cens$f[[paste(atState)]](runif(nrow(data)), inv=TRUE), 
                    function(x) min(x, cens$admin))
     
   ##################################################### - END of CENSORING - ###
     
   
   ### - UPDATE DATASET - #######################################################
-  data[subjs, sapply(c(".time", ".status"), function(x)
+  data[, sapply(c(".time", ".status"), function(x)
     paste("tr", outTrans, x, sep=""))] <-
-      t(apply(cbind(data[subjs, paste("tr", outTrans, ".time", sep="")],
+      t(apply(cbind(data[, paste("tr", outTrans, ".time", sep="")],
                     C.time=C.time), 1, function(x)
                       c(rep(min(x), length(x)-1), 
                         1:(length(x)-1) == which.min(x))))
@@ -119,12 +117,14 @@ scan.tmat <- function(data,
   if (iterative) {
     for (ot in outTrans) { # ot, the number of the transition in tmat
       # find out concerned subjects
-      subjs <- data[data[[paste("tr", ot, ".status", sep="")]] > 0, "ID"]
+      subjs <- which(data[[paste("tr", ot, ".status", sep="")]] > 0)
       # call scan.tmat on them
-      if (length(subjs))
-        data <- scan.tmat(data=data, inTrans=ot, subjs=subjs,
-                          eta=eta,   tmat=tmat,  clock=clock,
-                          marg=marg, cens=cens,  copula=copula)
+      if (length(subjs)) {
+        data[subjs, ] <- scan.tmat(data=data[subjs, ], inTrans=ot, #subjs=subjs,
+                                   eta=eta[subjs, ],   tmat=tmat,  
+                                   clock=clock,        marg=marg,
+                                   cens=cens,          copula=copula)
+      }
     }
   }
   ############################################# - END of NEXT EVENTS TIMES - ###
