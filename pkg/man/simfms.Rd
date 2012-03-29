@@ -16,13 +16,13 @@ in a proportional hazards way.
 }
 \usage{
 simfms(nsim = NULL, tmat = NULL, clock = "forward", 
-       frailty = list(dist = "gamma", par = 0.5), 
+       frailty = list(dist="gamma", par= .5, type="shared"), 
        nclus = NULL, csize = NULL, 
        covs = NULL, beta = NULL, 
        marg = list(dist = "weibull", lambda = 1, rho = 1), 
        cens = list(dist = "weibull", lambda = 1, rho = 1, admin = 72), 
        copula = list(name = "clayton", par = 1),
-       fulldata = FALSE)
+       format = "long")
 }
 
 \arguments{
@@ -38,12 +38,29 @@ simfms(nsim = NULL, tmat = NULL, clock = "forward",
       }
     }
   \item{frailty}{The frailty term specifications. A list with components:
-    \tabular{ll}{
-      \code{dist}\tab
+    \itemize{
+      \item \code{dist}:
         the name of the frailty distribution 
-        (only \code{gamma} implemented at now)\cr
-      \code{par}\tab
+        (only \code{gamma} implemented at now)
+      \item \code{par}:
         the frailty parameter(s) value
+      \item \code{type}: the type of frailty
+        \itemize{
+          \item \code{shared}:
+            iid and
+            shared by the times of transitions of any type,
+            for all subjects in a group
+          \item \code{iid}:
+            iid and
+            shared by the times of transitions of the same type,
+            for all subjects in a group
+            (possible different frailty parameters 
+            for different transition types)
+          \item \code{nested}:
+            id and correlated by means of nested frailties            
+            (possible different frailty parameters 
+            for different transition types)        
+        }
     }
   }
   \item{nclus}{The number of clusters to simulate}
@@ -56,32 +73,34 @@ simfms(nsim = NULL, tmat = NULL, clock = "forward",
     vectors of the same length as the number of transitions 
     \code{max(tmat, na.rm=TRUE)}}
   \item{marg}{The marginal baseline hazards. A list with components
-    \tabular{ll}{
-      \code{dist}\tab
+    \itemize{
+      \item \code{dist}:
         the name of the baseline hazard distributions
-        (one value for all transitions)\cr
-      \code{eachpar}\tab
+        (one value for all transitions)
+      \item \code{eachpar}:
       each baseline parameter (either one value
       or as many as the number of transitions in code{tmat})
       }
     }
   \item{cens}{The censoring time distributions. A list with components
-    \tabular{ll}{
-      \code{dist}\tab
+    \itemize{
+      \item \code{dist}:
         the name of the censoring distributions
-        (one value for all transitions)\cr
-      \code{eachpar}\tab
+        (one value for all transitions)
+      \item \code{eachpar}:
         each censoring distribution parameter (either one value
         or as many as the number of possible starting states
         in \code{tmat}, possibly with states' names)
        }
      }
   \item{copula}{The copula model. A list with components
-    \tabular{ll}{
-      \code{name}\tab the name of the copula 
-        (only \code{clayton} available at now)\cr
-      \code{par}\tab the copula parameter
+    \itemize{
+      \item \code{name}: the name of the copula 
+        (only \code{clayton} available at now)
+      \item \code{par}: the copula parameter
     }
+  }
+  \item{format}{the data format, either \code{long} or \code{wide}
   }
 }
 

@@ -66,7 +66,9 @@ scan.tmat <- function(data,
   if (length(outTrans) == 0)
     return(data)
   ################################################### - END of PREPARATION - ###
-
+  
+  cat(paste("Simultaion of times starting from state '", atState, "'...\n", 
+            sep=""))
   
   ### - COMPETING EVENTS TIMES - ###############################################
   for (ot in outTrans) { # ot, the number of the transition in tmat!!!!!!!!!!!!!
@@ -80,18 +82,17 @@ scan.tmat <- function(data,
                         drop=FALSE]
       prevMargs <- marg[paste(prevOTs)]
     }
+      
+    data[, paste("tr", outTrans[ot.N], ".time", sep="")] <-
+      sapply(1:nrow(data), function(x) eval(parse(text=copula$name))(
+        par=copula$par,
+        condTime=condTime[x],
+        condMarg=condMarg,
+        trans=ot, marg=marg[[paste(ot)]],
+        prevTimes=prevTimes[x, ], prevMargs=prevMargs,
+        eta=eta[x, c(inTrans, prevOTs, ot)], tmat=tmat,
+        clock=clock))
     
-    for (subj in 1:nrow(data)) {
-      data[subj, paste("tr", outTrans[ot.N], ".time", sep="")] <-
-        eval(parse(text=copula$name))(
-          par=copula$par,
-          condTime=condTime[subj],
-          condMarg=condMarg,
-          trans=ot, marg=marg[[paste(ot)]],
-          prevTimes=prevTimes[subj, ], prevMargs=prevMargs,
-          eta=eta[subj, c(inTrans, prevOTs, ot)], tmat=tmat,
-          clock=clock)
-    }
   }
   ######################################## - END of COMPETING EVENTS TIMES - ###
   

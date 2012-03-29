@@ -11,7 +11,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 13, 2012                                   #
+#   Last modification on: March, 29, 2012                                      #
 ################################################################################
 
 simCov <- function(covs, 
@@ -36,6 +36,7 @@ simCov <- function(covs,
       stop(paste("The element '", names(covs)[i],
                  "' of the covariates list 'covs' is not a function!", sep=""))
     
+    cat(paste("Simultaion of covariate '", names(covs)[i],"'...\n", sep=""))
     res[[names(covs)[[i]]]] <- covs[[i]](nsim)
   }
   return(as.data.frame(res))

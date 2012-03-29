@@ -30,7 +30,7 @@ simFrail <-function(Fdist=NULL,
   z <- matrix(1, nrow = nclus, ncol = ntrans)
   
   if (Ftype != "i") {
-    cat("\nSimultaion of shared frailty...\n")
+    cat("Simultaion of shared frailty...\n")
     if (substr(Fdist, 1, 3) == "gam") {
       z <- z * matrix(rep(rgamma(nclus,  shape=1/Fpar[1], scale=Fpar[1]), 
                           ntrans), ncol = ntrans)
@@ -40,7 +40,7 @@ simFrail <-function(Fdist=NULL,
   }
   
   if (Ftype != "s") {
-    cat("\nSimultaion of transition-specific frailty...\n")
+    cat("Simultaion of transition-specific frailty...\n")
     if (substr(Fdist, 1, 3) == "gam") {
       Rgamma <- function(nclus, Fpar, ntrans) {
         rgamma(nclus, shape=1/Fpar, scale=Fpar)

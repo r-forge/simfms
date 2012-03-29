@@ -53,7 +53,9 @@ checks <- function(nsim,
                    marg,
                    cens,
                    # Copula
-                   copula
+                   copula,
+                   # Data format
+                   format
                    ) {
   ### Transition matrix ###
   if (is.null(tmat))
@@ -66,7 +68,7 @@ checks <- function(nsim,
   ### Clock ###
   if (is.null(clock)) {
     clock <- "f"
-    warning("Parameter 'clock' is not set! Fixed to 'forward'.")
+    cat("\nParameter 'clock' is not set! Fixed to 'forward'.")
   }
   if (tolower(substring(clock, 1, 1)) == "r")
     clock <- "reset"
@@ -88,7 +90,7 @@ checks <- function(nsim,
                paste(validfrailties, collapse="', '"),
                "'.", sep=""))
   if (is.null(frailty$type)) {
-    warning("No frailty type specified! Set to 'shared'")
+    cat("\nNo frailty type specified! Set to 'shared'")
     Ftype <- "shared"
   } else {
     Ftype <- frailty$type
@@ -253,7 +255,7 @@ checks <- function(nsim,
   #[3.b] ONLY nsim GIVEN
   else if (!is.null(nsim)) {
     nclus <- round((runif(1)*nsim)^.5)
-    warning(paste("\n Randomly generated number of clusters 'nclus':", 
+    cat(paste("\n Randomly generated number of clusters 'nclus':", 
                   nclus, "\n"))
   }
   #[3.c] ONLY nclus GIVEN
@@ -272,7 +274,7 @@ checks <- function(nsim,
     csize <- runif(nclus)
     csize <- round(csize / sum(csize) * nsim)
     csize[nclus] <- nsim - sum(csize[-nclus])
-    warning("\n Randomly generated clusters' sizes 'cszie'")
+    cat("\n\n Randomly generated clusters' sizes 'cszie'")
   }
   # last very last control
   if(nsim != sum(csize) || length(csize) != nclus)
@@ -281,6 +283,10 @@ checks <- function(nsim,
   # ------------------------------ end of Sizes ------------------------------ #
   ##############################################################################
 
+  if (! substr(format, 1, 1) %in% c("l", "w")) {
+    cat("\nInvalid 'format' value. Set to 'long'.")
+  }
+  
   return(list(nsim  = nsim, 
               nclus = nclus,
               csize = csize,

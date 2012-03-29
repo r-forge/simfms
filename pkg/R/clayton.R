@@ -33,15 +33,12 @@
 ################################################################################
 
 clayton <- function(par,
-#                     subj,
                     condTime,
                     condMarg,
-                    atState,
                     trans,
                     marg,
                     prevTimes,
                     prevMargs,
-#                     data,
                     eta,
                     tmat,
                     clock) {
