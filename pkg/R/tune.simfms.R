@@ -55,30 +55,30 @@
 #   Last modification on: February, 20, 2012                                   #
 ################################################################################
 
-tune.simfms <- function(nsim  = 5000,
-                        tmat  = NULL,
-                        clock = "forward",
-                        # Frailty
-                        frailty = list(dist="gamma",
-                                       par= .5),
-                        nclus = NULL, 
-                        csize = NULL,
-                        # Covariates
-                        covs = NULL,
-                        beta = NULL,
-                        # Marginals
-                        marg  = list(dist="weibull",
-                                     lambda=1, rho=1), 
-                        cens  = list(dist="weibull", 
-                                     lambda=1, rho=1, 
-                                     admin= 72),
-                        # Copula
-                        copula= list(name="clayton",
-                                     par= 1),
-                        # !!! - TARGET VALUES - !!!
-                        target = list(prob = NULL,
-                                      meds = NULL)
-                        ) {
+# tune.simfms <- function(nsim  = 5000,
+#                         tmat  = NULL,
+#                         clock = "forward",
+#                         # Frailty
+#                         frailty = list(dist="gamma",
+#                                        par= .5),
+#                         nclus = NULL, 
+#                         csize = NULL,
+#                         # Covariates
+#                         covs = NULL,
+#                         beta = NULL,
+#                         # Marginals
+#                         marg  = list(dist="weibull",
+#                                      lambda=1, rho=1), 
+#                         cens  = list(dist="weibull", 
+#                                      lambda=1, rho=1, 
+#                                      admin= 72),
+#                         # Copula
+#                         copula= list(name="clayton",
+#                                      par= 1),
+#                         # !!! - TARGET VALUES - !!!
+#                         target = list(prob = NULL,
+#                                       meds = NULL)
+#                         ) {
   ### - CONTROLS - #############################################################
   checked <- checks(nsim=nsim,   tmat=tmat,   
                     clock=clock, frailty=frailty,
@@ -113,4 +113,4 @@ tune.simfms <- function(nsim  = 5000,
 #   ########################################### - END of TUNING of PARAMETERS - ###
 #   
 #   return(respars)
-}
+# }

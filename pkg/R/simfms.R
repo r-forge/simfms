@@ -11,6 +11,7 @@
 #   - frailty   : the frailty term specifications. A list with components      #
 #                 dist: the name of the frailty distribution                   #
 #                 par : the frailty parameter(s) value                         #
+#                 type: the type of frailty: 'shared', 'iid' or 'nested'       #
 #   - nclus     : the number of clusters to simulate                           #
 #   - csize     : the size(s) of cluster                                       #
 #   - covs      : the covariates to simulate. A list with components           #
@@ -37,7 +38,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 20, 2012                                   #
+#   Last modification on: March, 29, 2012                                      #
 ################################################################################
 
 simfms <- function(nsim  = NULL,
@@ -45,7 +46,8 @@ simfms <- function(nsim  = NULL,
                    clock = "forward",
                    # Frailty
                    frailty = list(dist="gamma",
-                                  par= .5),
+                                  par= .5,
+                                  type="shared"),
                    nclus = NULL, 
                    csize = NULL,
                    # Covariates
@@ -69,6 +71,7 @@ simfms <- function(nsim  = NULL,
   nsim  <- checked$nsim
   nclus <- checked$nclus
   csize <- checked$csize
+  frailty$type <- checked$Ftype
   clock <- checked$clock
   marg  <- checked$marg
   cens  <- checked$cens

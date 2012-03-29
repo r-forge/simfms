@@ -11,6 +11,7 @@
 #   - frailty   : the frailty term specifications. A list with components      #
 #                 dist: the name of the frailty distribution                   #
 #                 par : the frailty parameter(s) value                         #
+#                 type: the frailty type: 'shared', 'iid' or 'nested'          #
 #   - nclus     : the number of clusters to simulate                           #
 #   - csize     : the size(s) of cluster                                       #
 #   - covs      : the covariates to simulate. A list with components           #
@@ -35,7 +36,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 13, 2012                                                   #
-#   Last modification on: February, 20, 2012                                   #
+#   Last modification on: March, 29, 2012                                      #
 ################################################################################
 
 checks <- function(nsim,
@@ -86,6 +87,27 @@ checks <- function(nsim,
     stop(paste("Frailty distribution not valid! \nIt must be one of '",
                paste(validfrailties, collapse="', '"),
                "'.", sep=""))
+  if (is.null(frailty$type)) {
+    warning("No frailty type specified! Set to 'shared'")
+    Ftype <- "shared"
+  } else {
+    Ftype <- frailty$type
+  }
+  if (! substr(Ftype, 1, 1) %in% c("s", "i", "n")) {
+    stop(paste("The frailties type must be",
+               "'shared', 'iid' or 'nested'!"))
+  }
+  nFpars <- length(frailty$par)
+  nFpars.possible <- unlist(list(s = 1,
+                                 i = c(1, max(tmat, na.rm=TRUE)),
+                                 n = c(2, max(tmat, na.rm=TRUE) + 1))[
+                                   substr(Ftype, 1, 1)])
+  if (! nFpars %in% nFpars.possible) {
+    stop(paste("Wrong length of frailty parameters vector.",
+               "It is", nFpars, "instead of", 
+               paste(nFpars.possible, collapse=" or ")))
+  }
+  rm(nFpars.possible)
   
   ### Covariates and regression parameters ###
   if (!(is.list(covs) || is.null(covs)))
@@ -262,6 +284,7 @@ checks <- function(nsim,
   return(list(nsim  = nsim, 
               nclus = nclus,
               csize = csize,
+              Ftype = Ftype,
               clock = clock,
               marg  = marg,
               cens  = cens))

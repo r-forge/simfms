@@ -12,6 +12,7 @@
 #   - frailty   : the frailty term specifications. A list with components      #
 #                 dist: the name of the frailty distribution                   #
 #                 par : the frailty parameter(s) value                         #
+#                 type: the type of frailty: 'shared', 'iid' or 'nested'       #
 #   - nclus     : the number of clusters to simulate                           #
 #   - csize     : the size(s) of cluster                                       #
 #   - covs      : the covariates to simulate. A list with components           #
@@ -23,7 +24,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 20, 2012                                                   #
-#   Last modification on: February, 20, 2012                                   #
+#   Last modification on: March, 29, 2012                                      #
 ################################################################################
 
 initialize.fms <- function(nsim,
@@ -46,29 +47,33 @@ initialize.fms <- function(nsim,
   
   
   ### - FRAILTIES - ############################################################
-  data <- cbind(data, simFrail(Fdist=frailty$dist, 
-                               Fpar =frailty$par,
-                               nsim=nsim, nclus=nclus, csize=csize))
+  frailties <- simFrail(Fdist=frailty$dist, 
+                        Ftype=frailty$type,
+                        Fpar =frailty$par,
+                        nclus=nclus, 
+                        ntrans=max(tmat, na.rm=TRUE))
+  data <- cbind(frailties[unlist(mapply(rep, 1:nclus, csize)), ], data,
+                row.names="ID")
   ##################################################### - END of FRAILTIES - ###
   
   
   ### - COVARIATES - ###########################################################
+  notCov <- 1:ncol(data)
   if (!is.null(covs))
     data <- cbind(data, simCov(covs=covs, nsim=nsim))
   #################################################### - END of COVARIATES - ###
   
   ### - LINEAR PREDICTORS - ####################################################
   # Covariates constributions
-  notCov <- 1:(3 +                      # ID, z, Cluster
-    2 * max(tmat, na.rm=TRUE))  # tr1.time, tr1.status, ...
-  if (is.null(beta))
-    eta <- 0  else
-      eta <- as.matrix(data[,-notCov]) %*% t(as.data.frame(beta))
+  if (is.null(beta)) {
+    eta <- 0  
+  } else {
+    eta <- as.matrix(data[,-notCov]) %*% t(as.data.frame(beta))
+  }
   
   # Frailty contribution
-  eta <- eta +
-    matrix(rep(log(data$z), max(tmat, na.rm=TRUE)), nrow(data), 
-           dimnames=list(ID=data$ID, trans=1:max(tmat, na.rm=TRUE)))
+  eta <- eta + log(data[, substr(names(data), 1, 6) == "frail."])
+  colnames(eta) <- paste("tr", 1:max(tmat, na.rm=TRUE), ".eta", sep="")
   ############################################# - END of LINEAR PREDICTORS - ###
   
   return(list(data=data, 

@@ -7,11 +7,11 @@ for (f in list.files())
 
 
 
-nsim  = 50#00
+nsim  = 25 #5000
 tmat  = trans.cancer.reduced()
 clock = "forward"
-frailty = list(dist="gamma", par= .5)
-nclus = 5#0
+frailty = list(dist="gamma", par= c(.5, .5), type="n")
+nclus = 5 #0
 csize = NULL
 covs = list(age=function(x) rnorm(x, mean=60, sd=7),
             treat=function(x) rbinom(x, 1, .5))
@@ -19,6 +19,7 @@ beta = list(age=rep(.02, 5), treat=rep(2, 5))
 marg  = list(dist="weibull", lambda=1, rho=1)
 cens  = list(dist="weibull", lambda=.2, rho=1, admin= .72)
 copula= list(name="clayton", par= 1)
+
 
 
 
