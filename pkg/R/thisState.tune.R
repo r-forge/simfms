@@ -39,7 +39,7 @@
 #                                                                              #
 #                                                                              #
 #   Date: February, 20, 2012                                                   #
-#   Last modification on: February, 21, 2012                                   #
+#   Last modification on: March, 30, 2012                                      #
 ################################################################################
 
 thisState.tune <- function(target,
@@ -104,7 +104,7 @@ thisState.tune <- function(target,
     cat(paste("Starting optimisation of parameter ",
               par,
               " at ", format(Sys.time(), "%X"),
-              " (", Sys.Date(), "):", sep=""))
+              " (", Sys.Date(), ")", sep=""))
     optime <- system.time({par.res <- optim(inipar, 
                                   fn=tomin, 
                                   par.name=par, outTrans=outTrans,
@@ -112,7 +112,7 @@ thisState.tune <- function(target,
                                   tmat=tmat, clock=clock, marg=marg, cens=cens,
                                   copula=copula, target=target,
                                   method="SANN")})
-    cat(paste("it lasted ", sec2ext(optime[2]), ".\n", sep=""))
+    cat(paste("\n Execution time: ", sec2ext(optime[1]), "\n", sep=""))
     
     marg[outTrans, par] <- attr(eval(parse(text=as.character(marg[1, "dist"]))), 
                                 "optimPars")(par.res$par[outTrans], inv=TRUE)
