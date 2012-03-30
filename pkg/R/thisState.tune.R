@@ -42,16 +42,16 @@
 #   Last modification on: February, 21, 2012                                   #
 ################################################################################
 
-# thisState.tune <- function(target,
-#                            data,
-#                            atState,
-#                            eta,
-#                            tmat,
-#                            clock,
-#                            marg,
-#                            cens,
-#                            copula
-#                            ){
+thisState.tune <- function(target,
+                           data,
+                           atState,
+                           eta,
+                           tmat,
+                           clock,
+                           marg,
+                           cens,
+                           copula
+                           ){
   ### - PREPARATION - ##########################################################
   if (is.null(atState))
     atState <- colnames(tmat)[which(colSums(tmat, na.rm=TRUE) == 0)]
@@ -92,10 +92,6 @@
         names(cmarg) <- 1:length(cmarg)
       ccens <- list(f = apply(cens$f, 1, extractMargs),
                     admin = cens$admin)
-#       censdist <- attr(eval(parse(text=as.character(cens$f[1, "dist"]))), 
-#                        "optimPars")
-#       cens[[par.name]][atState] <-
-#         censdist(x[length(x)], inv=TRUE)
       
       criterion(data=data, atState=atState, eta=eta,
                 tmat=tmat, clock=clock, 
@@ -124,20 +120,20 @@
                                   "optimPars")(par.res$par[-outTrans], inv=TRUE)
   }
   
-  ### - COMPETING RISKS PARAMETERS TUNING - #####################################
+  ### - COMPETING RISKS PARAMETERS TUNING - ####################################
   
-  ######################################################### - END of TUNING - ###
+  ######################################################## - END of TUNING - ###
   
   
-  ### - UPDATE PARAMETERS - #####################################################
+  ### - UPDATE PARAMETERS - ####################################################
 #   data[, sapply(c(".time", ".status"), function(x)
 #     paste("tr", outTrans, x, sep=""))] <-
 #       t(apply(cbind(data[, paste("tr", outTrans, ".time", sep="")],
 #                     C.time=C.time), 1, function(x)
 #                       c(rep(min(x), length(x)-1), 
 #                         1:(length(x)-1) == which.min(x))))
-  ############################################## - END of UPDATE PARAMETERS - ###
+  ############################################# - END of UPDATE PARAMETERS - ###
   
   
-#   return(list(marg=marg, cens=cens))
-# }
+   return(list(marg=marg, cens=cens))
+ }
