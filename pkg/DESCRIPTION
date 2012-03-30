@@ -1,8 +1,8 @@
 Package: simfms
 Type: Package
 Title: Simulation of clustered multi-state data
-Version: 0.12.3-29
-Date: 2012-03-29
+Version: 0.12.3-30
+Date: 2012-03-30
 Author: Federico Rotolo
 Maintainer: Federico Rotolo <federico.rotolo@stat.unipd.it>
 Description: R functions implementing the simulation procedure proposed at

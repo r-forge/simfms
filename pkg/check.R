@@ -1,4 +1,4 @@
-rm(list=ls())
+rm(list=ls()); gc()
 setwd("/home/federico/Documents/uni/dottorato_pd_2010/Rcode/simfms/pkg/R")
 for (f in list.files()) 
    if (! f %in% c("tune.simfms.R" , "thisState.tune.R"
@@ -7,51 +7,50 @@ for (f in list.files())
 
 
 # 
-# nsim  = 25 #5000
-# tmat  = trans.cancer.reduced()
-# clock = "forward"
-# frailty = list(dist="gamma", par= c(.5, .5), type="n")
-# nclus = 5 #0
-# csize = NULL
-# covs = list(age=function(x) rnorm(x, mean=60, sd=7),
-#             treat=function(x) rbinom(x, 1, .5))
-# beta = list(age=rep(.02, 5), treat=rep(2, 5))
-# marg  = list(dist="weibull", lambda=1, rho=1)
-# cens  = list(dist="weibull", lambda=.8, rho=1, admin= .72)
-# copula= list(name="clayton", par= 1)
-# 
-# 
-# 
-# 
-# source("tune.simfms.R")
-# 
-# atState=NULL
-# subjs=1:nsim
-# 
-# # !!! - TARGET VALUES - !!!
-# target = list(prob = rbind(
-#   NED= c(NED=NA, LR=0.34, DM=0.09, De=0.07),
-#   LR=c(NA, NA, NA, 0.47),
-#   DM=c(NA, NA, NA, 0.95),
-#   De=NA),
-#               meds = rbind(
-#                 NED= c(NED=NA, LR=6, DM=10, De=3),
-#                 LR=c(NA, NA, NA, 3.25),
-#                 DM=c(NA, NA, NA, 0.5),
-#                 De=NA))
-# 
-# # debugonce(scan.tmat)
-# criterion(data=data, atState="NED", subjs=subjs,
-#           eta=eta, tmat=tmat, clock=clock,
-#           marg=marg, cens=cens, copula=copula, target=target)
-# 
-# 
-# 
-# source("thisState.tune.R")
+nsim  = 25#00
+tmat  = trans.cancer.reduced()
+clock = "forward"
+frailty = list(dist="gamma", par= c(.5, .5), type="n")
+nclus = 5#0
+csize = NULL
+covs = list(age=function(x) rnorm(x, mean=60, sd=7),
+            treat=function(x) rbinom(x, 1, .5))
+beta = list(age=rep(.02, 5), treat=rep(2, 5))
+marg  = list(dist="weibull", lambda=1, rho=1)
+cens  = list(dist="weibull", lambda=.8, rho=1, admin= .72)
+copula= list(name="clayton", par= .25)
+format="long"
 
-# thisState.tune(data = data, atState = atState, subjs = subjs,
-#                eta = eta, tmat = tmat, clock = clock,
-#                marg = marg, cens = cens, copula = copula, target =target)
+#########################################################################
+#########################################################################
+# !!! - TARGET VALUES - !!!
+target = list(prob = rbind(
+  NED= c(NED=NA, LR=0.34, DM=0.09, De=0.07),
+  LR=c(NA, NA, NA, 0.47),
+  DM=c(NA, NA, NA, 0.95),
+  De=NA),
+              meds = rbind(
+                NED= c(NED=NA, LR=6, DM=10, De=3),
+                LR=c(NA, NA, NA, 3.25),
+                DM=c(NA, NA, NA, 0.5),
+                De=NA))
+source("tune.simfms.R")
+head(data)
+atState="NED"
+source("thisState.tune.R")
+
+thisState.tune(data = data, atState = atState, subjs = subjs,
+               eta = eta, tmat = tmat, clock = clock,
+               marg = marg, cens = cens, copula = copula, target =target)
+##########################################################################
+##########################################################################
+# debugonce(criterion)
+system.time({
+  criterion(data=data[data$tr1.status==1,], atState="LR", 
+            eta=eta[data$tr1.status==1,], tmat=tmat, clock=clock,
+            marg=marg, cens=cens, copula=copula, target=target)
+})
+
 
 set.seed(1)
 system.time({

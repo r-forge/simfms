@@ -48,7 +48,8 @@ scan.tmat <- function(data,
                       marg,
                       cens,
                       copula,
-                      iterative = TRUE
+                      iterative = TRUE,
+                      verbose=TRUE
                       ) {
   ### - PREPARATION - ##########################################################
   # Present state and Conditioning transition infos
@@ -67,8 +68,9 @@ scan.tmat <- function(data,
     return(data)
   ################################################### - END of PREPARATION - ###
   
-  cat(paste("Simultaion of times starting from state '", atState, "'...\n", 
-            sep=""))
+  if (verbose)
+    cat(paste("Simultaion of times starting from state '", atState, "'...\n", 
+              sep=""))
   
   ### - COMPETING EVENTS TIMES - ###############################################
   for (ot in outTrans) { # ot, the number of the transition in tmat!!!!!!!!!!!!!
@@ -121,7 +123,7 @@ scan.tmat <- function(data,
       subjs <- which(data[[paste("tr", ot, ".status", sep="")]] > 0)
       # call scan.tmat on them
       if (length(subjs)) {
-        data[subjs, ] <- scan.tmat(data=data[subjs, ], inTrans=ot, #subjs=subjs,
+        data[subjs, ] <- scan.tmat(data=data[subjs, ], inTrans=ot,
                                    eta=eta[subjs, ],   tmat=tmat,  
                                    clock=clock,        marg=marg,
                                    cens=cens,          copula=copula)

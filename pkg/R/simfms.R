@@ -107,7 +107,7 @@ simfms <- function(nsim  = NULL,
     ### - COMPUTATION of TRANSITION TIMES - ######################################
     cat("\n# 3 # Simulation of the time data\n")
     # Detailed data for each transition
-    data <- scan.tmat(data=data, inTrans=NULL, #subjs=1:nrow(data),
+    data <- scan.tmat(data=data, inTrans=NULL,
                       eta=eta,   tmat=tmat,    clock=clock,
                       marg=marg, cens=cens,    copula=copula)
     ########################################### - END of COMPUTATION of TIMES - ###
